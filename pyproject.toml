@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "enhanced-search"
+description = "A library to orchestrate the BIOfid semantic search"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "AGPLv3"}
+classifiers = [
+    "Programming Language :: Python :: 3.8",
+    "Development Status :: 3 - Alpha",
+]
+dependencies = [
+]
+version = "0.1.0"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["tests*"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-mypy",
+    "pytest-cov",
+    "black",
+    "tox"
+]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "--mypy --maxfail=1 --last-failed -ra -q --cov --cov-report term-missing --cov-fail-under 95"
+testpaths = [
+    "tests"
+]
+
+[tool.coverage.run]
+source = ["src"]
