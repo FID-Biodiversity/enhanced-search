@@ -11,8 +11,10 @@ license = {text = "AGPLv3"}
 classifiers = [
     "Programming Language :: Python :: 3.8",
     "Development Status :: 3 - Alpha",
+    "OSI Approved :: GNU Affero General Public License v3"
 ]
 dependencies = [
+    "walrus==0.9.2"
 ]
 version = "0.1.0"
 
@@ -26,15 +28,20 @@ dev = [
     "pytest-mypy",
     "pytest-cov",
     "black",
-    "tox"
+    "tox",
+    "pip-licenses"
 ]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "--mypy --maxfail=1 --last-failed -ra -q --cov --cov-report term-missing --cov-fail-under 95"
+addopts = "--mypy --last-failed -ra -q --cov --cov-report term-missing --cov-fail-under 95"
 testpaths = [
     "tests"
 ]
 
 [tool.coverage.run]
 source = ["src"]
+
+[tool.mypy]
+ignore_missing_imports = true
+warn_unused_configs = true
