@@ -75,10 +75,10 @@ def stream_words_from_query(text: str) -> Generator[Tuple[str, int, int], None, 
 
         yield text, current_start_position, current_end_position
 
-        for extending_token in tokens[index + 1:]:
+        for extending_token in tokens[index + 1 :]:
             extending_token = extending_token.strip(strip_characters)
             text = " ".join((text, extending_token))
-            current_end_position += len(extending_token) + 1    # +1: Added whitespace
+            current_end_position += len(extending_token) + 1  # +1: Added whitespace
 
             yield text, current_start_position, current_end_position
 

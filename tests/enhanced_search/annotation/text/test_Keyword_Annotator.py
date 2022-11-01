@@ -2,13 +2,16 @@ from typing import List
 
 import pytest
 
-from enhanced_search.annotation.text import Annotation, TextAnnotator
-from enhanced_search.annotation.text.engines import (
-    StringBasedNamedEntityAnnotatorEngine,
+from enhanced_search.annotation.text import (
+    Annotation,
+    TextAnnotator,
+    TextAnnotatorConfiguration,
 )
 from enhanced_search.annotation.text.data import (
-    TextAnnotatorConfiguration,
     NamedEntityType,
+)
+from enhanced_search.annotation.text.engines import (
+    StringBasedNamedEntityAnnotatorEngine,
 )
 
 

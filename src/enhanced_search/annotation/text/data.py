@@ -55,12 +55,3 @@ class AnnotationResult:
     """Holds the current state of the annotation process."""
 
     named_entity_recognition: List[Annotation] = field(default_factory=list)
-
-
-@dataclass
-class TextAnnotatorConfiguration:
-    """Holds the configuration data for the TextAnnotator."""
-
-    named_entity_recognition: Optional["AnnotationEngine"] = None
-    dependency_recognition: Optional["AnnotationEngine"] = None
-    entity_linker: Optional["AnnotationEngine"] = None

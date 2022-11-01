@@ -82,8 +82,7 @@ class RedisDatabase:
             "url": self.url,
             "port": self.port,
             "db": self.db_number,
-            "decode_responses": True,   # do not return bytes (default),
-                                        # but strings
+            "decode_responses": True,   # return strings, instead of bytes
         }
 
         parameters.update(self.credentials)

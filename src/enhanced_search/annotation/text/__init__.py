@@ -1,7 +1,17 @@
+from dataclasses import dataclass
 from typing import List, Optional
 
-from .data import Annotation, TextAnnotatorConfiguration, AnnotationResult
+from .data import Annotation, AnnotationResult
 from .engines import AnnotationEngine
+
+
+@dataclass
+class TextAnnotatorConfiguration:
+    """Holds the configuration data for the TextAnnotator."""
+
+    named_entity_recognition: Optional[AnnotationEngine] = None
+    dependency_recognition: Optional[AnnotationEngine] = None
+    entity_linker: Optional[AnnotationEngine] = None
 
 
 class TextAnnotator:

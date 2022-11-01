@@ -28,8 +28,7 @@ dev = [
     "pytest-mypy",
     "pytest-cov",
     "black",
-    "tox",
-    "pip-licenses"
+    "flake8"
 ]
 
 [tool.pytest.ini_options]
