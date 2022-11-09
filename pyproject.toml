@@ -14,7 +14,9 @@ classifiers = [
     "OSI Approved :: GNU Affero General Public License v3"
 ]
 dependencies = [
-    "walrus==0.9.2"
+    "walrus==0.9.2",
+    "SPARQLWrapper==2.0.0",
+    "SPARQL-Burger==1.0.1"
 ]
 version = "0.1.0"
 
@@ -27,13 +29,15 @@ dev = [
     "pytest>=7.0",
     "pytest-mypy",
     "pytest-cov",
+    "pytest-pylint",
     "black",
-    "flake8"
+    "flake8",
+    "rdflib"
 ]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "--mypy --last-failed -ra -q --cov --cov-report term-missing --cov-fail-under 95"
+#addopts = "--mypy --pylint -ra -q --cov --cov-report term-missing --cov-fail-under 95"
 testpaths = [
     "tests"
 ]

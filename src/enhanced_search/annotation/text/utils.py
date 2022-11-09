@@ -4,7 +4,7 @@ from copy import deepcopy
 from typing import Generator, Tuple
 
 from enhanced_search import configuration as config
-from enhanced_search.annotation.text.data import NamedEntityType, Annotation
+from enhanced_search.annotation import NamedEntityType, Annotation
 
 named_entity_mapping = {
     config.PLANT_ANNOTATION_STRING.lower(): NamedEntityType.PLANT,
@@ -14,6 +14,7 @@ named_entity_mapping = {
     "animal": NamedEntityType.ANIMAL,
     "location": NamedEntityType.LOCATION,
     "taxon": NamedEntityType.TAXON,
+    "misc": NamedEntityType.MISCELLANEOUS,
 }
 
 
@@ -23,7 +24,7 @@ def convert_annotation_string_to_named_entity_type(
     """Takes a string (e.g. "Plant_Flora") and retrieves the corresponding
     NamedEntityType.
     """
-    number_of_expected_named_entity_types = 4
+    number_of_expected_named_entity_types = 5
 
     if len(NamedEntityType) != number_of_expected_named_entity_types:
         raise LookupError(

@@ -2,14 +2,7 @@ from typing import List
 
 import pytest
 
-from enhanced_search.annotation.text import (
-    Annotation,
-    TextAnnotator,
-    TextAnnotatorConfiguration,
-)
-from enhanced_search.annotation.text.data import (
-    NamedEntityType,
-)
+from enhanced_search.annotation import Annotation, NamedEntityType, AnnotationResult
 from enhanced_search.annotation.text.engines import (
     StringBasedNamedEntityAnnotatorEngine,
 )
@@ -162,44 +155,13 @@ class TestStringBasedNamedEntityAnnotatorEngine:
             ),
         ],
     )
-    def test_annotation(
+    def test_parse(
         self,
-        annotator: TextAnnotator,
+        string_based_ne_annotator_engine: StringBasedNamedEntityAnnotatorEngine,
         text: str,
         expected_annotations: List[Annotation],
     ):
         """Feature: Basic annotation with the KeywordAnnotationEngine."""
-        annotations = annotator.annotate(text)
-        assert annotations == expected_annotations
-
-    @pytest.fixture
-    def annotator(self, database):
-        ne_engine = StringBasedNamedEntityAnnotatorEngine(database)
-        configuration = TextAnnotatorConfiguration(named_entity_recognition=ne_engine)
-        return TextAnnotator(configuration)
-
-    @pytest.fixture
-    def database(self):
-        return DummyKeyValueDatabase()
-
-
-class DummyKeyValueDatabase:
-    def __init__(self):
-        self.data = {
-            "quercus": '{"Plant_Flora": '
-            '[["https://www.biofid.de/ontology/quercus", 3]]}',
-            "quercus sylvestris": '{"Plant_Flora": '
-            '[["https://www.biofid.de/ontology/quercus_sylvestris", 3]]}',
-            "fagus": '{"Plant_Flora": '
-            '[["https://www.biofid.de/ontology/fagus", 3]]}',
-            "fagus sylvatica": '{"Plant_Flora": '
-            '[["https://www.biofid.de/ontology/fagus_sylvatica", 3]]}',
-            "deutschland": '{"Location_Place": [['
-            '"https://sws.geonames.org/deutschland", 3]]}',
-            "paris": '{"Location_Place": [["https://sws.geonames.org/paris", 3]],'
-            '"Plant_Flora": [["https://www.biofid.de/ontology/fagus_sylvatica"'
-            ", 3]]}",
-        }
-
-    def read(self, query: str) -> str:
-        return self.data.get(query)
+        annotation_result = AnnotationResult()
+        string_based_ne_annotator_engine.parse(text, annotation_result)
+        assert annotation_result.named_entity_recognition == expected_annotations
