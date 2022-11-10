@@ -1,12 +1,12 @@
 import pytest
 
 from enhanced_search.annotation import (
-    Query,
     Annotation,
-    Uri,
     Feature,
     LiteralString,
     NamedEntityType,
+    Query,
+    Uri,
 )
 from enhanced_search.annotation.query.processors import SemanticQueryProcessor
 

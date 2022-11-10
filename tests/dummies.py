@@ -1,6 +1,8 @@
-import json
+"""A set of dummy databases for testing purposes."""
+
 import pathlib
 from typing import Optional, Union
+
 from rdflib import Graph
 
 
@@ -18,9 +20,16 @@ class DummySparqlKnowledgeDatabase:
         parameters and returns the retrieved data as string.
         """
         result = self.db.query(query)
-        return result.serialize(format="json").decode("utf-8")
+
+        serialized_data = result.serialize(format="json")
+
+        if serialized_data is not None:
+            return serialized_data.decode("utf-8")
+
+        raise TypeError('No data found for the given query!')
 
     def parse(self, rdf_source_path: Union[pathlib.Path, str]) -> None:
+        """Load the RDF data from a given path."""
         self.db.parse(rdf_source_path)
 
     def sanitize_query(self, text: str) -> str:
@@ -39,6 +48,7 @@ class DummyKeyValueDatabase:
         self.data = {}
 
     def read(self, query: str) -> str:
+        """Get data for a query string."""
         self._raise_if_not_valid(query)
         return self.data.get(query)
 
