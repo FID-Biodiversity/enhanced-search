@@ -1,4 +1,4 @@
-""" Contains all patterns to match the annotations of a query string.
+""" Contains all patterns to match the annotations of a text string.
 I went with classes instead of simple RegEx statements, since classes allow
 for further internal manipulation of the output. A procedure that is not
 necessary in all patterns, but is useful in some (e.g. in situation, where there is
@@ -19,30 +19,32 @@ from re import Match as RegexMatch
 from re import Pattern as RegexPattern
 from typing import List, Optional
 
-from enhanced_search.annotation import Query, Annotation, Statement
-from enhanced_search.annotation.utils import (
-    convert_query_to_abstracted_string,
-)
+from enhanced_search.annotation import Annotation, LiteralString, Statement
+from enhanced_search.annotation.utils import convert_text_to_abstracted_string
 
 
 class Pattern(ABC):
-    """A base class that allows the matching of query strings."""
+    """A base class that allows the matching of text strings."""
 
     regex_pattern: RegexPattern = None
 
-    def match(self, query: Query) -> List[Statement]:
-        """Checks the given query, if it fits the internal pattern.
+    def match(
+        self, text: str, annotations: List[Annotation], literals: List[LiteralString]
+    ) -> List[Statement]:
+        """Checks the given text, if it fits the internal pattern.
         Returns a list of dictionaries, each holding context data of a single
-        match within the query. If no match was found, the list is empty.
+        match within the text. If no match was found, the list is empty.
         """
-        abstracted_matching_string = convert_query_to_abstracted_string(query)
+        abstracted_matching_string = convert_text_to_abstracted_string(
+            text, annotations, literals
+        )
         matches = self.regex_pattern.search(abstracted_matching_string)
 
-        return compile_result(matches, query)
+        return compile_result(matches, annotations, literals)
 
 
 class OnlyTaxonPattern(Pattern):
-    """Matching query examples:
+    """Matching text examples:
 
     * "Fagus"
     * "Fagus sylvatica"
@@ -52,7 +54,7 @@ class OnlyTaxonPattern(Pattern):
 
 
 class SimpleTaxonLocationPattern(Pattern):
-    """Matching query examples:
+    """Matching text examples:
 
     * "Fagus Deutschland"
     * "Fagus in Deutschland"
@@ -66,7 +68,7 @@ class SimpleTaxonLocationPattern(Pattern):
 
 
 class TaxonPropertyPattern(Pattern):
-    """Matching query examples:
+    """Matching text examples:
 
     * "Pflanzen mit roten Blüten"
     * "Plant with red flowers"
@@ -81,7 +83,7 @@ class TaxonPropertyPattern(Pattern):
 
 
 class TaxonNumericalPropertyPattern(Pattern):
-    """Matching query examples:
+    """Matching text examples:
 
     * "Pflanzen mit 3 Kelchblättern"
     * "Plant with 3 petals"
@@ -96,7 +98,9 @@ class TaxonNumericalPropertyPattern(Pattern):
 
 
 def compile_result(
-    matches: Optional[RegexMatch], query: Query
+    matches: Optional[RegexMatch],
+    annotations: List[Annotation],
+    literals: List[LiteralString],
 ) -> List[Statement]:
     """Uses the group names of the matches to generate a dict with all URI data.
     The group names are used as keys. The value of the group should be that of
@@ -106,7 +110,7 @@ def compile_result(
     if matches is None:
         return []
 
-    words = query.annotations + query.literals
+    words = annotations + literals
     word_index = {word.id: word for word in words}
 
     context = []

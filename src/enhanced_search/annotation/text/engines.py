@@ -1,21 +1,24 @@
 import json
 import re
 from copy import deepcopy
-from typing import Protocol
+from typing import Generator, Protocol
 
 from enhanced_search.annotation import (
-    AnnotationResult,
     Annotation,
-    Uri,
+    AnnotationResult,
     NamedEntityType,
+    Uri, LiteralString,
 )
 from enhanced_search.databases import KeyValueDatabase
-from .utils import (
-    stream_words_from_query,
-    update_annotation_with_data,
-    convert_annotation_string_to_named_entity_type,
-)
+
 from ..utils import replace_substring_between_positions
+from .dependencies import patterns
+from .utils import (
+    convert_annotation_string_to_named_entity_type,
+    stream_words_from_query,
+    tokenize_text,
+    update_annotation_with_data,
+)
 
 
 class AnnotationEngine(Protocol):
@@ -204,3 +207,75 @@ class DisambiguationAnnotationEngine:
         matches = self.regex_query_for_location.match(abstracted_text)
 
         return matches is not None
+
+
+class PatternDependencyAnnotationEngine:
+    """Inferences semantic relationships between Annotations and returns them
+    as Statement.
+
+    This AnnotationEngine relies on the fact that there already exists an
+    Annotation list. The inferencing is done RegEx patterns.
+
+    Obeys the AnnotatorEngine interface!
+    """
+
+    patterns = [
+        patterns.TaxonPropertyPattern(),
+        patterns.TaxonNumericalPropertyPattern(),
+    ]
+
+    def parse(self, text: str, annotation_result: AnnotationResult) -> None:
+        """Searches for patterns in a given query and returns
+        a list of context data. If no pattern matches the query, the resulting list
+        is empty.
+
+        The present patterns are iterated successively and a result is returned
+        as soon as a pattern matches.
+        """
+        statements = []
+
+        for pattern in self.patterns:
+            statements = pattern.match(
+                text=text,
+                annotations=annotation_result.named_entity_recognition,
+                literals=annotation_result.literals,
+            )
+            if statements:
+                break
+
+        annotation_result.annotation_relationships = statements
+
+
+class LiteralAnnotationEngine:
+    """Simply only puts all tokens that are not Annotations into a list.
+
+    Obeys the AnnotatorEngine interface!
+    """
+
+    def parse(self, text: str, annotation_result: AnnotationResult) -> None:
+        """Puts all tokens into a list."""
+
+        annotation_by_start_index = {
+            annotation.begin: annotation
+            for annotation in annotation_result.named_entity_recognition
+        }
+
+        literals = []
+        token_start = 0
+        last_annotation_end = -1
+        for token in tokenize_text(text):
+            if (
+                token_start not in annotation_by_start_index
+                and token_start > last_annotation_end
+            ):
+                token_end = token_start + len(token)
+                literal = LiteralString(begin=token_start, end=token_end, text=token)
+                literals.append(literal)
+            else:
+                annotation = annotation_by_start_index.get(token_start)
+                if annotation is not None:
+                    last_annotation_end = annotation.end
+
+            token_start += len(token) + 1
+
+        annotation_result.literals = literals

@@ -6,6 +6,7 @@ from enhanced_search.annotation import (
     LiteralString,
     NamedEntityType,
     Query,
+    Statement,
     Uri,
 )
 from enhanced_search.annotation.query.processors import SemanticQueryProcessor
@@ -133,6 +134,18 @@ class TestSemanticQueryProcessor:
                     literals=[
                         LiteralString(begin=9, end=12, text="mit", is_safe=False)
                     ],
+                    statements=[
+                        Statement(
+                            subject={Uri("https://www.biofid.de/ontology/pflanzen")},
+                            predicate={
+                                Uri(
+                                    url="https://pato.org/flower_part",
+                                    position_in_triple=2,
+                                )
+                            },
+                            object={Uri(url="https://pato.org/red_color")},
+                        )
+                    ],
                 ),
                 ExpectedQuery(
                     "Pflanzen mit roten Blüten",
@@ -211,6 +224,20 @@ class TestSemanticQueryProcessor:
                         LiteralString(begin=9, end=12, text="mit", is_safe=False),
                         LiteralString(begin=13, end=14, text="3", is_safe=False),
                     ],
+                    statements=[
+                        Statement(
+                            subject={Uri("https://www.biofid.de/ontology/pflanzen")},
+                            predicate={
+                                Uri(
+                                    "https://pato.org/has_petal_count",
+                                    position_in_triple=2,
+                                )
+                            },
+                            object=LiteralString(
+                                begin=13, end=14, text="3", is_safe=False
+                            ),
+                        )
+                    ],
                 ),
                 ExpectedQuery(
                     "Pflanzen mit 3 Kelchblättern",
@@ -278,6 +305,20 @@ class TestSemanticQueryProcessor:
                     literals=[
                         LiteralString(begin=9, end=12, text="mit", is_safe=False),
                         LiteralString(begin=13, end=15, text="25", is_safe=False),
+                    ],
+                    statements=[
+                        Statement(
+                            subject={Uri("https://www.biofid.de/ontology/pflanzen")},
+                            predicate={
+                                Uri(
+                                    "https://pato.org/has_petal_count",
+                                    position_in_triple=2,
+                                )
+                            },
+                            object=LiteralString(
+                                begin=13, end=15, text="25", is_safe=False
+                            ),
+                        )
                     ],
                 ),
                 ExpectedQuery(
@@ -362,6 +403,17 @@ class TestSemanticQueryProcessor:
                     ],
                     literals=[
                         LiteralString(begin=6, end=9, text="mit", is_safe=False),
+                    ],
+                    statements=[
+                        Statement(
+                            subject={Uri("https://www.biofid.de/ontology/paris")},
+                            predicate={
+                                Uri(
+                                    "https://pato.org/flower_part", position_in_triple=2
+                                )
+                            },
+                            object={Uri("https://pato.org/green_color")},
+                        )
                     ],
                 ),
                 ExpectedQuery(

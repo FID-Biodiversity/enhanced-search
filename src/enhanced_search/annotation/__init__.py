@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum
-
-from typing import Set, Optional, List, Union, Dict
+from typing import Dict, List, Optional, Set, Union
 
 
 class NamedEntityType(Enum):
@@ -66,8 +65,8 @@ class Feature:
     always be associated with an Annotation.
     """
 
-    property: Optional[Union[LiteralString, Uri, Set[Uri]]] = None
-    value: Optional[Union[LiteralString, Uri, Set[Uri]]] = None
+    property: Optional[Union[LiteralString, Set[Uri]]] = None
+    value: Optional[Union[LiteralString, Set[Uri]]] = None
 
 
 @dataclass
@@ -92,9 +91,9 @@ class Statement:
     subject and object.
     """
 
-    subject: Optional[Union[Set[Uri], Uri]] = None
-    predicate: Optional[Union[Set[Uri], Uri]] = None
-    object: Optional[Union[Set[Uri], LiteralString, Uri]] = None
+    subject: Optional[Set[Uri]] = None
+    predicate: Optional[Set[Uri]] = None
+    object: Optional[Set[Uri], LiteralString] = None
 
 
 @dataclass
@@ -102,10 +101,12 @@ class AnnotationResult:
     """Holds the current state of the annotation process."""
 
     named_entity_recognition: List[Annotation] = field(default_factory=list)
+    literals: List[LiteralString] = field(default_factory=list)
     entity_linking: Dict[Annotation, List[Uri]] = field(default_factory=dict)
     disambiguated_annotations: Dict[Annotation, Annotation] = field(
         default_factory=dict
     )
+    annotation_relationships: List[Statement] = field(default_factory=list)
 
 
 @dataclass

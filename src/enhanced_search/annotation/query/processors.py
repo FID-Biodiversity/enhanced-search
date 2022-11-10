@@ -1,14 +1,13 @@
-from typing import Set, Optional, Union
+from typing import Optional, Set, Union
 
 from enhanced_search.annotation import (
-    Query,
-    Feature,
-    Uri,
-    Statement,
-    LiteralString,
     Annotation,
+    Feature,
+    LiteralString,
+    Query,
+    Statement,
+    Uri,
 )
-from enhanced_search.annotation.analyzers import AnnotationPatternAnalyser
 from enhanced_search.annotation.text import TextAnnotator
 from enhanced_search.factories import SemanticEngineFactory
 
@@ -57,9 +56,6 @@ class SemanticQueryProcessor:
         the criteria, the received URIs are updating the Annotations uris. The original
         URI(s) for this annotation
         """
-        annotation_pattern_analyser = AnnotationPatternAnalyser()
-        query.statements = annotation_pattern_analyser.get_annotation_context(query)
-
         engine_factory = SemanticEngineFactory()
         semantic_engine = engine_factory.create(self.semantic_engine_name)
         additional_annotation_data = semantic_engine.generate_query_semantics(query)

@@ -147,8 +147,8 @@ def load_class(module_path: str, required_type: Optional[type] = None) -> Type[A
     a subclass of the required_type.
     """
     module, clazz = module_path.rsplit(".", 1)
-    module = importlib.import_module(module)
-    class_callable = getattr(module, clazz)
+    module_type = importlib.import_module(module)
+    class_callable = getattr(module_type, clazz)
 
     if required_type is not None and not issubclass(
         class_callable, required_type

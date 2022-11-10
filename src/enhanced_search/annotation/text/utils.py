@@ -1,7 +1,7 @@
 import json
 import shlex
 from copy import deepcopy
-from typing import Generator, Tuple
+from typing import Generator, Tuple, List
 
 from enhanced_search import configuration as config
 from enhanced_search.annotation import NamedEntityType, Annotation
@@ -58,13 +58,18 @@ def sort_named_entities_by_priority(named_entity_type_string: str) -> int:
     )
 
 
+def tokenize_text(text: str) -> List[str]:
+    """Splits a given text by whitespaces, but preserves quoted strings."""
+    return shlex.split(text)
+
+
 def stream_words_from_query(text: str) -> Generator[Tuple[str, int, int], None, None]:
     """Returns substrings of the given query in a deterministic order.
     Characters like question marks (?) and exclamation marks (!) are removed from a
     returned word. The word are returned with its original case, no general lower
     casing.
     """
-    tokens = shlex.split(text)  # Splits on whitespace, but preserves quotations
+    tokens = tokenize_text(text)
     strip_characters = "?! "
 
     current_start_position = 0

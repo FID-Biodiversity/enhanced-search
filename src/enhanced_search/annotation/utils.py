@@ -1,9 +1,11 @@
-from typing import Union
+from typing import List, Union
 
-from enhanced_search.annotation import Query, Uri, LiteralString, Annotation
+from enhanced_search.annotation import Annotation, LiteralString, Uri
 
 
-def convert_query_to_abstracted_string(query: Query) -> str:
+def convert_text_to_abstracted_string(
+    text: str, annotations: List[Annotation], literals: List[LiteralString]
+) -> str:
     """Creates a abstracted version of the original query string.
     The abstraction is depending on the annotations and the literals.
     If no annotation is given in the query, the original string will be returned.
@@ -17,21 +19,22 @@ def convert_query_to_abstracted_string(query: Query) -> str:
     The hash in the <> is the ID of the respective Annotation/LiteralString
     for reference.
     """
-    annotated_query_string = query.original_string
+    annotated_query_string = text
 
-    tokens = query.annotations + query.literals
+    tokens = annotations + literals
 
-    for token in sorted(
-        tokens, key=lambda t: t.begin, reverse=True
-    ):
+    for token in sorted(tokens, key=lambda t: t.begin, reverse=True):
         if isinstance(token, Annotation):
-            substitution_text = f"{{{token.named_entity_type.value.lower()}" \
-                                f"<{token.id}>}}"
+            substitution_text = (
+                f"{{{token.named_entity_type.value.lower()}" f"<{token.id}>}}"
+            )
         elif isinstance(token, LiteralString):
             substitution_text = f"{token.text}<{token.id}>"
         else:
-            raise TypeError(f"The given token has type {type(token)}, "
-                            f"while a Token is demanded!")
+            raise TypeError(
+                f"The given token has type {type(token)}, "
+                f"while a Token is demanded!"
+            )
 
         annotated_query_string = replace_substring_between_positions(
             original_text=annotated_query_string,

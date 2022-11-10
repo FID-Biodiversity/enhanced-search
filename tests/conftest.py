@@ -8,6 +8,8 @@ from enhanced_search import configuration as config
 from enhanced_search.annotation.text import TextAnnotator, TextAnnotatorConfiguration
 from enhanced_search.annotation.text.engines import (
     DisambiguationAnnotationEngine,
+    LiteralAnnotationEngine,
+    PatternDependencyAnnotationEngine,
     StringBasedNamedEntityAnnotatorEngine,
     UriLinkerAnnotatorEngine,
 )
@@ -105,20 +107,36 @@ def loaded_key_value_database():
 # ANNOTATOR ENGINES #
 @pytest.fixture(scope="session")
 def string_based_ne_annotator_engine(loaded_key_value_database):
-    """A Named Entity Annotator Engine."""
+    """A Named Entity AnnotationEngine."""
     return StringBasedNamedEntityAnnotatorEngine(loaded_key_value_database)
 
 
 @pytest.fixture(scope="session")
 def uri_linker_annotator_engine(loaded_key_value_database):
-    """An Annotator Engine linking Annotations to a fitting URI."""
+    """An AnnotationEngine linking Annotations to a fitting URI."""
     return UriLinkerAnnotatorEngine(loaded_key_value_database)
 
 
 @pytest.fixture(scope="session")
 def disambiguation_annotator_engine():
-    """An Annotator Engine trying to resolve disambiguation."""
+    """An AnnotationEngine trying to resolve disambiguation."""
     return DisambiguationAnnotationEngine()
+
+
+@pytest.fixture(scope="session")
+def pattern_dependency_annotator_engine():
+    """An AnnotationEngine finding relationships between Annotations
+    and LiteralStrings.
+    """
+    return PatternDependencyAnnotationEngine()
+
+
+@pytest.fixture(scope="session")
+def literal_annotator_engine():
+    """An AnnotationEngine that wraps all non-Annotation tokens into
+    a LiteralString.
+    """
+    return LiteralAnnotationEngine()
 
 
 @pytest.fixture
