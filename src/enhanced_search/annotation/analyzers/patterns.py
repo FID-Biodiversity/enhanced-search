@@ -19,7 +19,7 @@ from re import Match as RegexMatch
 from re import Pattern as RegexPattern
 from typing import List, Optional
 
-from enhanced_search.annotation import Query, Annotation, Statement, Word
+from enhanced_search.annotation import Query, Annotation, Statement
 from enhanced_search.annotation.utils import (
     convert_query_to_abstracted_string,
 )

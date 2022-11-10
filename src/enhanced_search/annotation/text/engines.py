@@ -6,7 +6,8 @@ from typing import Protocol
 from enhanced_search.annotation import (
     AnnotationResult,
     Annotation,
-    Uri, NamedEntityType,
+    Uri,
+    NamedEntityType,
 )
 from enhanced_search.databases import KeyValueDatabase
 from .utils import (
@@ -38,6 +39,9 @@ class StringBasedNamedEntityAnnotatorEngine:
     Obeys the AnnotatorEngine interface!
     """
 
+    # This prevents strings of causing noise with little information
+    STRING_BLACKLIST = {"l.", "(l.)", "R.", "&", "var.", "in"}
+
     def __init__(self, db: KeyValueDatabase):
         self._db = db
 
@@ -51,10 +55,13 @@ class StringBasedNamedEntityAnnotatorEngine:
         end_of_last_complete_named_entity = 0
 
         for word, begin, end in stream_words_from_query(text):
-            if begin < end_of_last_complete_named_entity:
+            lowered_word = word.lower()
+            if begin < end_of_last_complete_named_entity or not self._is_word_valid(
+                lowered_word
+            ):
                 continue
 
-            corresponding_data = self._db.read(word.lower())
+            corresponding_data = self._db.read(lowered_word)
 
             if corresponding_data is not None:
                 previous_token_data = (begin, end, word, corresponding_data)
@@ -76,6 +83,13 @@ class StringBasedNamedEntityAnnotatorEngine:
         annotation = Annotation(begin=begin, end=end, text=word)
         update_annotation_with_data(annotation, annotation_data)
         return annotation
+
+    def _is_word_valid(self, word: str) -> bool:
+        """Disapproves very short words (< 2 characters) and numerical strings,
+        as well as words in the STRING_BLACKLIST."""
+        return (
+            not word.isnumeric() and len(word) > 2 and word not in self.STRING_BLACKLIST
+        )
 
 
 class UriLinkerAnnotatorEngine:

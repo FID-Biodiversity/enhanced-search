@@ -277,6 +277,7 @@ class TestSemanticQueryProcessor:
                     ],
                     literals=[
                         LiteralString(begin=9, end=12, text="mit", is_safe=False),
+                        LiteralString(begin=13, end=15, text="25", is_safe=False),
                     ],
                 ),
                 ExpectedQuery(
@@ -291,15 +292,17 @@ class TestSemanticQueryProcessor:
                             features=[
                                 Feature(
                                     property=None,
-                                    value=Uri(
-                                        "https://www.biofid.de/ontology/pflanzen"
-                                    ),
+                                    value={
+                                        Uri("https://www.biofid.de/ontology/pflanzen")
+                                    },
                                 ),
                                 Feature(
-                                    property=Uri(
-                                        "https://pato.org/has_petal_count",
-                                        position_in_triple=2,
-                                    ),
+                                    property={
+                                        Uri(
+                                            "https://pato.org/has_petal_count",
+                                            position_in_triple=2,
+                                        )
+                                    },
                                     value=LiteralString(begin=13, end=15, text="25"),
                                 ),
                             ],
@@ -339,22 +342,26 @@ class TestSemanticQueryProcessor:
                             },
                         ),
                         Annotation(
-                            begin=13,
-                            end=18,
-                            text="roten",
+                            begin=10,
+                            end=16,
+                            text="grünen",
                             named_entity_type=NamedEntityType.MISCELLANEOUS,
-                            uris={Uri("https://pato.org/red_color")},
+                            uris={Uri("https://pato.org/green_color")},
                         ),
                         Annotation(
-                            begin=19,
-                            end=25,
+                            begin=17,
+                            end=23,
                             text="Blüten",
                             named_entity_type=NamedEntityType.MISCELLANEOUS,
-                            uris={Uri("https://pato.org/flower_part")},
+                            uris={
+                                Uri(
+                                    "https://pato.org/flower_part", position_in_triple=2
+                                )
+                            },
                         ),
                     ],
                     literals=[
-                        LiteralString(begin=5, end=8, text="mit", is_safe=False),
+                        LiteralString(begin=6, end=9, text="mit", is_safe=False),
                     ],
                 ),
                 ExpectedQuery(
@@ -366,22 +373,30 @@ class TestSemanticQueryProcessor:
                             text="Paris",
                             named_entity_type=NamedEntityType.PLANT,
                             uris={
-                                Uri("https://www.biofid.de/ontology/paris_quadrifolia")
+                                Uri(
+                                    "https://www.biofid.de/ontology/paris_quadrifolia",
+                                    is_safe=True,
+                                )
                             },
                             features=[
                                 Feature(
                                     property=None,
-                                    value=Uri("https://www.biofid.de/ontology/paris"),
+                                    value={Uri("https://www.biofid.de/ontology/paris")},
                                 ),
                                 Feature(
-                                    property=Uri("https://pato.org/flower_part"),
-                                    value=Uri("https://pato.org/red_color"),
+                                    property={
+                                        Uri(
+                                            "https://pato.org/flower_part",
+                                            position_in_triple=2,
+                                        )
+                                    },
+                                    value={Uri("https://pato.org/green_color")},
                                 ),
                             ],
                         ),
                     ],
                     literals=[
-                        LiteralString(begin=5, end=8, text="mit", is_safe=False),
+                        LiteralString(begin=6, end=9, text="mit", is_safe=False),
                     ],
                 ),
             ),

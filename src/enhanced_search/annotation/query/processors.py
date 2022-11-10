@@ -1,6 +1,13 @@
-from typing import Set, Optional, List, Union
+from typing import Set, Optional, Union
 
-from enhanced_search.annotation import Query, Feature, Uri, Statement, LiteralString
+from enhanced_search.annotation import (
+    Query,
+    Feature,
+    Uri,
+    Statement,
+    LiteralString,
+    Annotation,
+)
 from enhanced_search.annotation.analyzers import AnnotationPatternAnalyser
 from enhanced_search.annotation.text import TextAnnotator
 from enhanced_search.factories import SemanticEngineFactory
@@ -15,6 +22,17 @@ class SemanticQueryProcessor:
     use Annotations of a Query, potentially inference data and further enrich the
     Annotations in the Query. If this process involves calling a database, this will
     be done automatically by the SemanticEngine.
+
+    Annotations that are associated with another Annotation, by e.g. describing it
+    further (in the query "Plants with red flowers", "red" and "flowers" are associated
+    with "Plants"). These Annotations are converted to a Feature and appended to the
+    associated Annotation. The Annotations that build the Feature are removed from the
+    Query Annotation List.
+
+    If no corresponding data for an Annotation could be found in a database, the
+    corresponding Annotation will have an empty URI list. But only if a database was
+    searched (hence, only with Annotations with additional descriptive Annotations,
+    not with simple queries like "Fagus sylvatica" or "Fagus sylvatica in Berlin".
     """
 
     def __init__(
@@ -46,46 +64,63 @@ class SemanticQueryProcessor:
         semantic_engine = engine_factory.create(self.semantic_engine_name)
         additional_annotation_data = semantic_engine.generate_query_semantics(query)
 
-        update_annotation_features(additional_annotation_data, query.statements)
+        update_annotations(additional_annotation_data, query)
 
         update_query(query)
 
 
-def update_annotation_features(
-    annotation_data: dict, statements: List[Statement]
-) -> None:
-    """Adds the enriched annotation data to the respective Annotations.
+def update_annotations(annotation_data: dict, query: Query) -> None:
+    """Adds the enriched annotation data to the respective Annotations
+    in the given Query.
+
     This updates the Annotation's features (if appropriate), where a Feature is
     composed of the data of the other Annotations in the same query. Furthermore,
     the Annotation's URIs are updated with retrieved URIs (if any).
     """
+    update_annotation_features(query)
+
     for annotation, uris in annotation_data.items():
-        feature = create_feature_from_uris(annotation.uris)
+        annotation.uris = uris
 
-        if feature is not None:
-            annotation.features.append(feature)
+    for annotation in query.annotations:
+        purge_ambiguous_annotations(annotation)
 
-        relevant_statements = [
-            statement
-            for statement in statements
-            if statement.subject == annotation.uris
-        ]
 
-        for statement in relevant_statements:
-            statement_object = statement.object
-            feature = create_feature_from_uris(statement_object)
+def update_annotation_features(query: Query) -> None:
+    """Handles the Feature creation for each Annotation."""
+    annotation_by_uri_index = {
+        freeze_key(annotation.uris): annotation for annotation in query.annotations
+    }
 
-            if feature is None:
-                feature = create_feature_from_uris(statement.predicate)
-                if statement_object is not None:
-                    feature.value = statement_object
-            else:
-                feature.property = statement.predicate
+    for statement in query.statements:
+        annotation = annotation_by_uri_index.get(freeze_key(statement.subject))
+        create_features_from_statements(annotation, statement)
+        annotation.uris = set()
 
-            if feature is not None:
-                annotation.features.append(feature)
 
-        annotation.uris = set(uris)
+def create_features_from_statements(
+    annotation: Annotation, statement: Statement
+) -> None:
+    """Creates a Feature for the given Statement and adds it
+    to the given Annotation.
+    """
+    feature = create_feature_from_uris(annotation.uris)
+
+    if feature is not None:
+        annotation.features.append(feature)
+
+    statement_object = statement.object
+    feature = create_feature_from_uris(statement_object)
+
+    if feature is None:
+        feature = create_feature_from_uris(statement.predicate)
+        if statement_object is not None:
+            feature.value = statement_object
+    else:
+        feature.property = statement.predicate
+
+    if feature is not None:
+        annotation.features.append(feature)
 
 
 def update_query(query: Query) -> None:
@@ -95,20 +130,13 @@ def update_query(query: Query) -> None:
     """
 
     features = tuple(
-        feature
-        for annotation in query.annotations
-        for feature in annotation.features
+        feature for annotation in query.annotations for feature in annotation.features
     )
-
-    def freeze_key(set_to_freeze: Union[Set[Uri], Uri]) -> tuple:
-        if isinstance(set_to_freeze, Uri):
-            return Uri,  # tuple
-        else:
-            return tuple(sorted(set_to_freeze, key=lambda a: a.url))
 
     uri_to_annotation_index = {
         freeze_key(annotation.uris): annotation
         for annotation in query.annotations
+        if annotation.uris
     }
 
     annotations_to_remove = set()
@@ -129,6 +157,11 @@ def update_query(query: Query) -> None:
         query.literals.remove(literal)
 
 
+def purge_ambiguous_annotations(annotation: Annotation) -> None:
+    """Removes all ambiguous annotations associated with an Annotation."""
+    annotation.ambiguous_annotations = set()
+
+
 def create_feature_from_uris(uris: Set[Uri]) -> Optional[Feature]:
     """Creates a Feature object from the given URIs."""
     if not uris or isinstance(uris, LiteralString):
@@ -142,3 +175,11 @@ def create_feature_from_uris(uris: Set[Uri]) -> Optional[Feature]:
         feature.value = uris
 
     return feature
+
+
+def freeze_key(set_to_freeze: Union[Set[Uri], Uri]) -> tuple:
+    """Returns a tuple of either a sorted set or containing a single Uri."""
+    if isinstance(set_to_freeze, Uri):
+        return (Uri,)
+    else:
+        return tuple(sorted(set_to_freeze, key=lambda a: a.url))

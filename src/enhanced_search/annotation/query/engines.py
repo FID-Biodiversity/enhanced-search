@@ -77,6 +77,17 @@ class SparqlQueryGenerator:
     NAMESPACES = {"terms": "https://dwc.tdwg.org/terms/#"}
     DEFAULT_LIMIT = 1000
 
+    SYSTEMATIC_HIERARCHY_PREDICATES = [
+        "terms:kingdom",
+        "terms:class",
+        "terms:order",
+        "terms:family",
+        "terms:genus",
+        "terms:phylum",
+        "terms:parentNameUsageID",
+        "terms:acceptedNameUsageID",
+    ]
+
     def __init__(self):
         self.select_limit = self.DEFAULT_LIMIT
         self.namespaces = self.NAMESPACES
@@ -124,20 +135,10 @@ class SparqlQueryGenerator:
         if statement.subject is None:
             return
 
-        systematic_hierarchy_predicates = [
-            "terms:kingdom",
-            "terms:class",
-            "terms:order",
-            "terms:family",
-            "terms:phylum",
-            "terms:parentNameUsageID",
-            "terms:acceptedNameUsageID",
-        ]
-
         hierarchical_values = Triple(
             subject="VALUES",
             predicate="?hasParent",
-            object=f"{{{' '.join(systematic_hierarchy_predicates)}}}",
+            object=f"{{{' '.join(self.SYSTEMATIC_HIERARCHY_PREDICATES)}}}",
         )
 
         subject_variable_name = "?subject"
@@ -153,7 +154,7 @@ class SparqlQueryGenerator:
                 predicate=subject_variable_name,
                 object=f"{{{subjects}}}",
             )
-            pattern.add_triples(taxon_values)
+            pattern.add_triples([taxon_values])
 
         taxon_triple = Triple(
             subject=taxon_variable_name,

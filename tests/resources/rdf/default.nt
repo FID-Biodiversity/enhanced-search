@@ -29,3 +29,7 @@
 <https://www.biofid.de/ontology/plant_with_green_flowers> <https://pato.org/flower_part> <https://pato.org/green_color> .
 <https://www.biofid.de/ontology/plant_with_red_flower_and_3_petals> <https://pato.org/flower_part> <https://pato.org/red_color> .
 <https://www.biofid.de/ontology/plant_with_red_flower_and_3_petals> <https://pato.org/has_petal_count> "3"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<https://www.biofid.de/ontology/paris_quadrifolia> <https://dwc.tdwg.org/terms/#genus> <https://www.biofid.de/ontology/paris> .
+<https://www.biofid.de/ontology/paris_quadrifolia> <https://pato.org/flower_part> <https://pato.org/green_color> .
+<https://www.biofid.de/ontology/paris_with_red_flowers> <https://dwc.tdwg.org/terms/#genus> <https://www.biofid.de/ontology/paris> .
+<https://www.biofid.de/ontology/paris_with_red_flowers> <https://pato.org/flower_part> <https://pato.org/red_color> .

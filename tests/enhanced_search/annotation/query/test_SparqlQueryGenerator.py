@@ -36,8 +36,8 @@ class TestSparqlQueryGenerator:
                 [
                     Statement(
                         subject=Uri("https://www.biofid.de/ontology/pflanzen"),
-                        predicate=[Uri("https://pato.org/flower_part", 2)],
-                        object=[Uri("https://pato.org/red_color", 3)],
+                        predicate={Uri("https://pato.org/flower_part", 2)},
+                        object={Uri("https://pato.org/red_color", 3)},
                     )
                 ],
                 [
@@ -52,7 +52,7 @@ class TestSparqlQueryGenerator:
                 [
                     Statement(
                         subject=Uri("https://www.biofid.de/ontology/pflanzen"),
-                        predicate=[Uri("https://pato.org/petal_part", 2)],
+                        predicate={Uri("https://pato.org/has_petal_count", 2)},
                         object=LiteralString(begin=15, end=16, text="3"),
                     )
                 ],

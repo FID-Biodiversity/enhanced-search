@@ -29,11 +29,12 @@ class DummySparqlKnowledgeDatabase:
 
 
 class DummyKeyValueDatabase:
-    """ Returns a value for a given key.
+    """Returns a value for a given key.
     Since very short sequences or numerical values led in the past to mayor
     performance penalties, a read with a short or numerical-only key (e.g. 1894) will
     raise a KeyError.
     """
+
     def __init__(self):
         self.data = {}
 
@@ -46,6 +47,8 @@ class DummyKeyValueDatabase:
         return text
 
     def _raise_if_not_valid(self, query: str) -> None:
-        if query.isnumeric() or len(query) <= 3:
-            raise KeyError('Reading short or numerical-only values is forbidden '
-                           'for performance reasons!')
+        if query.isnumeric() or len(query) <= 2:
+            raise KeyError(
+                f"Reading short or numerical-only values is forbidden "
+                f"for performance reasons! Provided was string: '{query}'"
+            )

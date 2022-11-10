@@ -92,9 +92,9 @@ class Statement:
     subject and object.
     """
 
-    subject: Optional[Union[Uri, Set[Uri]]] = None
-    predicate: Optional[Union[Uri, Set[Uri]]] = None
-    object: Optional[Union[Uri, Set[Uri], LiteralString]] = None
+    subject: Optional[Union[Set[Uri], Uri]] = None
+    predicate: Optional[Union[Set[Uri], Uri]] = None
+    object: Optional[Union[Set[Uri], LiteralString, Uri]] = None
 
 
 @dataclass
