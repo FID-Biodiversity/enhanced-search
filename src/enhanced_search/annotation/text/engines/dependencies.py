@@ -1,30 +1,33 @@
-""" Contains all patterns to match the annotations of a text string.
-I went with classes instead of simple RegEx statements, since classes allow
-for further internal manipulation of the output. A procedure that is not
-necessary in all patterns, but is useful in some (e.g. in situation, where there is
-negation).
-
-To allow ambiguity in an annotation (e.g. a word is recognized both as plant and as a
-location, the pattern matching has to catch cases like:
-    "{plant} in {plant|location}"
-Hence, all patterns should apply ".*?" within the curly brackets
-(i.e. "{.*?(?:taxon|plant|animal).*?}"), to consider this variability.
-
-For testing the regex, you can use: https://regex101.com/
-"""
-
 import re
 from abc import ABC
 from re import Match as RegexMatch
 from re import Pattern as RegexPattern
 from typing import List, Optional
 
-from enhanced_search.annotation import Annotation, LiteralString, Statement
+from enhanced_search.annotation import (
+    Annotation,
+    AnnotationResult,
+    LiteralString,
+    Statement,
+)
 from enhanced_search.annotation.utils import convert_text_to_abstracted_string
 
 
 class Pattern(ABC):
-    """A base class that allows the matching of text strings."""
+    """All patterns to match the annotations of a text string.
+    I went with classes instead of simple RegEx statements, since classes allow
+    for further internal manipulation of the output. A procedure that is not
+    necessary in all patterns, but is useful in some (e.g. in situation, where there is
+    negation).
+
+    To allow ambiguity in an annotation (e.g. a word is recognized both as plant and as a
+    location, the pattern matching has to catch cases like:
+        "{plant} in {plant|location}"
+    Hence, all patterns should apply ".*?" within the curly brackets
+    (i.e. "{.*?(?:taxon|plant|animal).*?}"), to consider this variability.
+
+    For testing the regex, you can use: https://regex101.com/
+    """
 
     regex_pattern: RegexPattern = None
 
@@ -128,3 +131,44 @@ def compile_result(
     context.append(statement)
 
     return context
+
+
+class PatternDependencyAnnotationEngine:
+    """Inferences semantic relationships between Annotations and returns them
+    as Statement.
+
+    This AnnotationEngine relies on the fact that there already exists an
+    Annotation list. The inferencing is done RegEx patterns.
+
+    Obeys the AnnotatorEngine interface!
+    """
+
+    patterns = [
+        TaxonPropertyPattern(),
+        TaxonNumericalPropertyPattern(),
+    ]
+
+    def parse(self, text: str, annotation_result: AnnotationResult) -> None:
+        """Searches for patterns in a given query and returns
+        a list of context data. If no pattern matches the query, the resulting list
+        is empty.
+
+        The present patterns are iterated successively and a result is returned
+        as soon as a pattern matches.
+        """
+        statements = []
+
+        for pattern in self.patterns:
+            statements = pattern.match(
+                text=text,
+                annotations=annotation_result.named_entity_recognition,
+                literals=annotation_result.literals,
+            )
+            if statements:
+                break
+
+        annotation_result.annotation_relationships = statements
+
+
+
+

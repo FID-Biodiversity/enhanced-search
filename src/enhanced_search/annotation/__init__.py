@@ -93,7 +93,7 @@ class Statement:
 
     subject: Optional[Set[Uri]] = None
     predicate: Optional[Set[Uri]] = None
-    object: Optional[Set[Uri], LiteralString] = None
+    object: Optional[Union[Set[Uri], LiteralString]] = None
 
 
 @dataclass
