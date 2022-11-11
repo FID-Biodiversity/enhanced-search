@@ -1,15 +1,12 @@
+"""Here, factory classes are defined that allow the easy creation of complex objects."""
+
 import importlib
 from copy import deepcopy
-from typing import Type, Any, Optional
+from typing import Any, Optional, Type
 
 from enhanced_search import configuration as config
-from enhanced_search.annotation.query.engines import (
-    SemanticEngine,
-)
-from enhanced_search.annotation.text import TextAnnotator, TextAnnotatorConfiguration
-from enhanced_search.annotation.text.engines import (
-    StringBasedNamedEntityAnnotatorEngine,
-)
+from enhanced_search.annotation.query.engines import SemanticEngine
+from enhanced_search.annotation.text import TextAnnotator
 from enhanced_search.databases.interface import Database
 
 CLASS_PATH_KEYWORD = "class"
@@ -20,9 +17,10 @@ class TextAnnotatorFactory:
 
     def create(self) -> TextAnnotator:
         """Create a new TextAnnotator object."""
-        ne_engine = StringBasedNamedEntityAnnotatorEngine()
-        configuration = TextAnnotatorConfiguration(named_entity_recognition=ne_engine)
-        return TextAnnotator(configuration)
+        # TODO: Create test and write function
+        # ne_engine = StringBasedNamedEntityAnnotatorEngine()
+        # configuration = TextAnnotatorConfiguration(named_entity_recognition=ne_engine)
+        # return TextAnnotator(configuration)
 
 
 class SemanticEngineFactory:
