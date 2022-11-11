@@ -2,7 +2,7 @@ from copy import copy
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
-from enhanced_search.annotation import Annotation, AnnotationResult, LiteralString, Word
+from enhanced_search.annotation import Annotation, AnnotationResult
 
 from .engines import AnnotationEngine
 
@@ -23,11 +23,7 @@ class TextAnnotator:
 
     def __init__(self, annotator_configuration: TextAnnotatorConfiguration):
         self.configuration = annotator_configuration
-
-    def annotate(self, text: str) -> AnnotationResult:
-        """Annotates the given text and returns a list of Annotations."""
-        result = AnnotationResult()
-        annotation_engines = [
+        self.annotation_engines = [
             self.configuration.named_entity_recognition,
             self.configuration.literal_recognition,
             self.configuration.dependency_recognition,
@@ -35,7 +31,11 @@ class TextAnnotator:
             self.configuration.disambiguation_engine,
         ]
 
-        for engine in annotation_engines:
+    def annotate(self, text: str) -> AnnotationResult:
+        """Annotates the given text and returns a list of Annotations."""
+        result = AnnotationResult()
+
+        for engine in self.annotation_engines:
             parse_data_to_engine_if_not_none(engine, text, result)
 
         return compile_annotations(result)

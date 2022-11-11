@@ -49,6 +49,9 @@ def set_database_configuration(default_n_triples_source_path):
         "sparql": {
             "class": "tests.dummies.DummySparqlKnowledgeDatabase",
             "rdf_source_path": default_n_triples_source_path,
+        },
+        "key-value": {
+            "class": "tests.dummies.DummyKeyValueDatabase",
         }
     }
 

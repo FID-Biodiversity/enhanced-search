@@ -6,7 +6,14 @@ from typing import Any, Optional, Type
 
 from enhanced_search import configuration as config
 from enhanced_search.annotation.query.engines import SemanticEngine
-from enhanced_search.annotation.text import TextAnnotator
+from enhanced_search.annotation.text import TextAnnotator, TextAnnotatorConfiguration
+from enhanced_search.annotation.text.engines import (
+    StringBasedNamedEntityAnnotatorEngine,
+    LiteralAnnotationEngine,
+    PatternDependencyAnnotationEngine,
+    UriLinkerAnnotatorEngine,
+    DisambiguationAnnotationEngine,
+)
 from enhanced_search.databases.interface import Database
 
 CLASS_PATH_KEYWORD = "class"
@@ -17,10 +24,38 @@ class TextAnnotatorFactory:
 
     def create(self) -> TextAnnotator:
         """Create a new TextAnnotator object."""
-        # TODO: Create test and write function
-        # ne_engine = StringBasedNamedEntityAnnotatorEngine()
-        # configuration = TextAnnotatorConfiguration(named_entity_recognition=ne_engine)
-        # return TextAnnotator(configuration)
+        configuration = self._get_default_configuration()
+        return self.create_by_configuration(configuration)
+
+    def create_by_configuration(
+        self, configuration: TextAnnotatorConfiguration
+    ) -> TextAnnotator:
+        """Creates a TextAnnotator object by the given configuration."""
+        return TextAnnotator(configuration)
+
+    def _get_default_configuration(self):
+        database_factory = DatabaseFactory()
+
+        try:
+            key_value_db = database_factory.create("key-value")
+            ne_engine = StringBasedNamedEntityAnnotatorEngine(db=key_value_db)
+            literal_engine = LiteralAnnotationEngine()
+            dependency_parser = PatternDependencyAnnotationEngine()
+            entity_linker = UriLinkerAnnotatorEngine(db=key_value_db)
+            disambiguation_engine = DisambiguationAnnotationEngine()
+
+            return TextAnnotatorConfiguration(
+                dependency_recognition=dependency_parser,
+                disambiguation_engine=disambiguation_engine,
+                entity_linker=entity_linker,
+                literal_recognition=literal_engine,
+                named_entity_recognition=ne_engine,
+            )
+        except KeyError:
+            raise RuntimeError(
+                "There is no default database available for the"
+                "TextAnnotator to be instantiated!"
+            )
 
 
 class SemanticEngineFactory:
@@ -148,9 +183,7 @@ def load_class(module_path: str, required_type: Optional[type] = None) -> Type[A
     module_type = importlib.import_module(module)
     class_callable = getattr(module_type, clazz)
 
-    if required_type is not None and not issubclass(
-        class_callable, required_type
-    ):
+    if required_type is not None and not issubclass(class_callable, required_type):
         raise TypeError(
             f"You have to provide a class obeying the Database interface! "
             f"The module '{module_path}' does not do so!"
