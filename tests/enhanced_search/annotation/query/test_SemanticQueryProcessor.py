@@ -1,3 +1,5 @@
+from typing import List
+
 import pytest
 
 from enhanced_search.annotation import (
@@ -12,6 +14,8 @@ from enhanced_search.annotation import (
 from enhanced_search.annotation.query.processors import SemanticQueryProcessor
 
 # Alias for clarity
+from enhanced_search.annotation.text import TextAnnotator
+
 ExpectedQuery = Query
 
 
@@ -373,10 +377,10 @@ class TestSemanticQueryProcessor:
                                     uris={Uri("https://sws.geonames.org/Paris")},
                                     features=[
                                         Feature(
-                                            property=Uri(
-                                                "https://pato.org/flower_part"
-                                            ),
-                                            value=Uri("https://pato.org/red_color"),
+                                            property={
+                                                Uri("https://pato.org/flower_part")
+                                            },
+                                            value={Uri("https://pato.org/red_color")},
                                         )
                                     ],
                                 )
@@ -505,13 +509,18 @@ class TestSemanticQueryProcessor:
             ),
         ],
     )
-    def test_annotate(self, query, expected_annotations, query_processor):
+    def test_annotate(
+        self,
+        query: Query,
+        expected_annotations: List[Annotation],
+        query_processor: SemanticQueryProcessor,
+    ):
         """Feature: A given query is correctly annotated, if possible."""
-        query_processor.annotate(query)
+        query_processor.update_query_with_annotations(query)
         assert query.annotations == expected_annotations
 
     @pytest.fixture
-    def query_processor(self, loaded_sparql_database, text_annotator):
+    def query_processor(self, text_annotator: TextAnnotator):
         return SemanticQueryProcessor(
             semantic_engine_name="sparql", text_annotator=text_annotator
         )

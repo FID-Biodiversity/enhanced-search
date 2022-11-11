@@ -6,7 +6,7 @@ from .dependencies import PatternDependencyAnnotationEngine
 from .disambiguation import DisambiguationAnnotationEngine
 from .literals import LiteralAnnotationEngine
 from .named_entity_recognition import StringBasedNamedEntityAnnotatorEngine
-from .uri_linking import UriLinkerAnnotatorEngine
+from .entity_linking import UriLinkerAnnotatorEngine
 
 
 class AnnotationEngine(Protocol):

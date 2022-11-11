@@ -1,15 +1,32 @@
 import json
 
 from enhanced_search.annotation import Annotation, AnnotationResult, Uri
+from enhanced_search.annotation.text.utils import (
+    convert_annotation_string_to_named_entity_type,
+)
 from enhanced_search.databases import KeyValueDatabase
-
-from ..utils import convert_annotation_string_to_named_entity_type
 
 
 class UriLinkerAnnotatorEngine:
     """Associates Annotations with their respective URIs.
     The association is done purely on a string base and not disambiguated.
     The URIs are retrieved from a KeyValueDatabase.
+
+    The data is stored in the `entity_linking` of the AnnotationResult.
+    The data is a dict with the Annotation IDs as keys. The value is
+    a dict with the NamedEntityTypes of the Annotation with the respective
+    URIs as values. This approach allows ambiguous Annotation resolution.
+
+    Example:
+         {
+            "Annotation-ID-1": {
+                "NamedEntityType.PLANT": {URI1, URI2, URI3},
+                "NamedEntityType.LOCATION": {URI1},
+            },
+            "Annotation-ID-2": {
+                "NamedEntityType.ANIMAL": {URI1, URI2}
+            }
+         }
 
     Obeys the AnnotatorEngine interface!
     """
@@ -44,30 +61,17 @@ class UriLinkerAnnotatorEngine:
         self, linked_uri_data: dict, annotation: Annotation, annotation_data: dict
     ) -> None:
         """Updates the URI data, if the annotation or any of its ambiguities fits."""
+        update_uri_data = {}
         for named_entity_type_string, uri_data_list in annotation_data.items():
             uris = {
                 Uri(url=uri, position_in_triple=position)
                 for uri, position in uri_data_list
             }
 
-            is_updated = self._add_to_dict_if_ne_type_fits(
-                annotation, named_entity_type_string, uris, linked_uri_data
+            normalized_ne_string = convert_annotation_string_to_named_entity_type(
+                named_entity_type_string
             )
 
-            if not is_updated:
-                for ambiguity in annotation.ambiguous_annotations:
-                    self._add_to_dict_if_ne_type_fits(
-                        ambiguity, named_entity_type_string, uris, linked_uri_data
-                    )
+            update_uri_data[normalized_ne_string] = uris
 
-    @staticmethod
-    def _add_to_dict_if_ne_type_fits(
-        ann: Annotation, processed_ne_type: str, uri_list: set, linked_uri_data: dict
-    ) -> bool:
-        if ann.named_entity_type == convert_annotation_string_to_named_entity_type(
-            processed_ne_type
-        ):
-            linked_uri_data[ann] = uri_list
-            return True
-
-        return False
+        linked_uri_data[annotation.id] = update_uri_data

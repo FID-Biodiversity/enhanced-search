@@ -20,10 +20,11 @@ class TestSparqlQueryGenerator:
         [
             (  # Scenario - Check that more than the filtered triples exist
                 [
-                    Statement(subject=Uri("https://www.biofid.de/ontology/pflanzen")),
+                    Statement(subject={Uri("https://www.biofid.de/ontology/pflanzen")}),
                 ],
                 [
                     "https://www.biofid.de/ontology/fagus_sylvatica",
+                    "https://www.biofid.de/ontology/fagus_sylvatica_sylvatica",
                     "https://www.biofid.de/ontology/plant_with_green_flowers",
                     "https://www.biofid.de/ontology/plant_with_no_flowers",
                     "https://www.biofid.de/ontology/plant_with_red_flower_1",
@@ -35,7 +36,7 @@ class TestSparqlQueryGenerator:
             (  # Scenario - Filter results for two URI attributes
                 [
                     Statement(
-                        subject=Uri("https://www.biofid.de/ontology/pflanzen"),
+                        subject={Uri("https://www.biofid.de/ontology/pflanzen")},
                         predicate={Uri("https://pato.org/flower_part", 2)},
                         object={Uri("https://pato.org/red_color", 3)},
                     )
@@ -51,7 +52,7 @@ class TestSparqlQueryGenerator:
             (  # Scenario - Filter results for URI with string association
                 [
                     Statement(
-                        subject=Uri("https://www.biofid.de/ontology/pflanzen"),
+                        subject={Uri("https://www.biofid.de/ontology/pflanzen")},
                         predicate={Uri("https://pato.org/has_petal_count", 2)},
                         object=LiteralString(begin=15, end=16, text="3"),
                     )

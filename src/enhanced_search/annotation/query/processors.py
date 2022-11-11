@@ -42,11 +42,12 @@ class SemanticQueryProcessor:
         self.text_annotator = text_annotator
         self.semantic_engine_name = semantic_engine_name
 
-    def annotate(self, query: Query) -> None:
+    def update_query_with_annotations(self, query: Query) -> None:
         """Adds further semantic data to the given query.
         The query object is updated in-place!
         """
-        query.annotations = self.text_annotator.annotate(query.original_string)
+        annotation_result = self.text_annotator.annotate(query.original_string)
+        query.annotations = annotation_result.named_entity_recognition
 
     def resolve_query_annotations(self, query: Query) -> None:
         """Adds further data to the annotations of the query.

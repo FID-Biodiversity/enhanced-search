@@ -144,11 +144,15 @@ def text_annotator(
     string_based_ne_annotator_engine,
     uri_linker_annotator_engine,
     disambiguation_annotator_engine,
+    literal_annotator_engine,
+    pattern_dependency_annotator_engine
 ):
     """A TextAnnotator that can analyse a Query object."""
     configuration = TextAnnotatorConfiguration(
         named_entity_recognition=string_based_ne_annotator_engine,
         entity_linker=uri_linker_annotator_engine,
         disambiguation_engine=disambiguation_annotator_engine,
+        literal_recognition=literal_annotator_engine,
+        dependency_recognition=pattern_dependency_annotator_engine,
     )
     return TextAnnotator(configuration)
