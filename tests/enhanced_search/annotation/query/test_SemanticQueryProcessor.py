@@ -481,6 +481,7 @@ class TestSemanticQueryProcessor:
                         begin=0,
                         end=15,
                         text="Fagus sylvatica",
+                        lemma="Fagus sylvatica",
                         named_entity_type=NamedEntityType.PLANT,
                         uris={Uri("https://www.biofid.de/ontology/fagus_sylvatica")},
                     )
@@ -495,6 +496,7 @@ class TestSemanticQueryProcessor:
                         begin=0,
                         end=5,
                         text="Fagus",
+                        lemma="Fagus",
                         named_entity_type=NamedEntityType.PLANT,
                         uris={Uri("https://www.biofid.de/ontology/fagus")},
                     ),
@@ -502,6 +504,7 @@ class TestSemanticQueryProcessor:
                         begin=9,
                         end=20,
                         text="Deutschland",
+                        lemma="Deutschland",
                         named_entity_type=NamedEntityType.LOCATION,
                         uris={Uri("https://sws.geonames.org/deutschland")},
                     ),
@@ -509,15 +512,99 @@ class TestSemanticQueryProcessor:
             ),
         ],
     )
-    def test_annotate(
+    def test_update_query_with_annotations(
         self,
         query: Query,
         expected_annotations: List[Annotation],
         query_processor: SemanticQueryProcessor,
     ):
-        """Feature: A given query is correctly annotated, if possible."""
+        """Feature: The annotations of a Query are correctly assigned."""
         query_processor.update_query_with_annotations(query)
         assert query.annotations == expected_annotations
+
+    @pytest.mark.parametrize(
+        ["query", "expected_statements"],
+        [
+            (  # Scenario - No statements
+                Query(
+                    "Fagus sylvatica",
+                    annotations=[
+                        Annotation(
+                            begin=0,
+                            end=15,
+                            text="Fagus",
+                            named_entity_type=NamedEntityType.PLANT,
+                            uris={
+                                Uri("https://www.biofid.de/ontology/fagus_sylvatica")
+                            },
+                        )
+                    ],
+                ),
+                [],
+            ),
+            (  # Scenario - Single statement
+                Query(
+                    "Pflanzen mit roten Blüten",
+                    annotations=[
+                        Annotation(
+                            begin=0,
+                            end=8,
+                            text="Pflanzen",
+                            named_entity_type=NamedEntityType.PLANT,
+                            uris={Uri("https://www.biofid.de/ontology/pflanzen")},
+                        ),
+                        Annotation(
+                            begin=13,
+                            end=18,
+                            text="roten",
+                            named_entity_type=NamedEntityType.MISCELLANEOUS,
+                            uris={
+                                Uri(
+                                    url="https://pato.org/red_color",
+                                    position_in_triple=3,
+                                )
+                            },
+                        ),
+                        Annotation(
+                            begin=19,
+                            end=25,
+                            text="Blüten",
+                            named_entity_type=NamedEntityType.MISCELLANEOUS,
+                            uris={
+                                Uri(
+                                    url="https://pato.org/flower_part",
+                                    position_in_triple=2,
+                                )
+                            },
+                        ),
+                    ],
+                    literals=[
+                        LiteralString(begin=9, end=12, text="mit", is_safe=False)
+                    ],
+                ),
+                [
+                    Statement(
+                        subject={Uri("https://www.biofid.de/ontology/pflanzen")},
+                        predicate={
+                            Uri(
+                                url="https://pato.org/flower_part",
+                                position_in_triple=2,
+                            )
+                        },
+                        object={Uri(url="https://pato.org/red_color")},
+                    )
+                ],
+            ),
+        ],
+    )
+    def test_update_query_with_statements(
+        self,
+        query: Query,
+        expected_statements: List[Statement],
+        query_processor: SemanticQueryProcessor,
+    ):
+        query_processor.update_query_with_annotations(query)
+        assert query.statements == expected_statements
 
     @pytest.fixture
     def query_processor(self, text_annotator: TextAnnotator):

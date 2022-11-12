@@ -1,4 +1,4 @@
-from typing import Optional, Set, Union
+from typing import Optional, Set, Union, List
 
 from enhanced_search.annotation import (
     Annotation,
@@ -47,7 +47,12 @@ class SemanticQueryProcessor:
         The query object is updated in-place!
         """
         annotation_result = self.text_annotator.annotate(query.original_string)
+
         query.annotations = annotation_result.named_entity_recognition
+        query.statements = create_statements_from_dependencies(
+            dependencies=annotation_result.annotation_relationships,
+            annotations=query.annotations,
+        )
 
     def resolve_query_annotations(self, query: Query) -> None:
         """Adds further data to the annotations of the query.
@@ -120,10 +125,30 @@ def create_features_from_statements(
         annotation.features.append(feature)
 
 
+def create_statements_from_dependencies(
+    dependencies: List[dict], annotations: List[Annotation]
+) -> List[Statement]:
+    """Compiles the output of the dependency parser to
+    generate a list of Statements.
+    """
+    annotation_by_id_index = {annotation.id: annotation for annotation in annotations}
+
+    statements = []
+    for dependency in dependencies:
+        statement_parameters = {
+            name: annotation_by_id_index[annotation_id].uris
+            for name, annotation_id in dependency.items()
+        }
+        statement = Statement(**statement_parameters)
+        statements.append(statement)
+
+    return statements
+
+
 def update_query(query: Query) -> None:
     """Updates the internal consistency of the Query object.
-    This method removes all Annotations that were assigned to be Features of another
-    Annotation.
+    This method removes all Annotations that were assigned to
+    be Features of another Annotation.
     """
 
     features = tuple(

@@ -21,6 +21,7 @@ class TestUriLinkerAnnotatorEngine:
                         begin=0,
                         end=15,
                         text="Fagus sylvatica",
+                        lemma="Fagus sylvatica",
                         named_entity_type=NamedEntityType.PLANT,
                     )
                 ],
@@ -41,12 +42,14 @@ class TestUriLinkerAnnotatorEngine:
                         begin=0,
                         end=5,
                         text="Paris",
+                        lemma="Paris",
                         named_entity_type=NamedEntityType.PLANT,
                         ambiguous_annotations={
                             Annotation(
                                 begin=0,
                                 end=5,
                                 text="Paris",
+                                lemma="Paris",
                                 named_entity_type=NamedEntityType.LOCATION,
                             )
                         },
@@ -56,7 +59,7 @@ class TestUriLinkerAnnotatorEngine:
                     "0/5": {
                         NamedEntityType.PLANT: {
                             Uri(
-                                url="https://www.biofid.de/ontology/fagus_sylvatica",
+                                url="https://www.biofid.de/ontology/paris",
                                 position_in_triple=3,
                             )
                         },

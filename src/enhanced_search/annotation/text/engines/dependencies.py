@@ -4,12 +4,7 @@ from re import Match as RegexMatch
 from re import Pattern as RegexPattern
 from typing import List, Optional
 
-from enhanced_search.annotation import (
-    Annotation,
-    AnnotationResult,
-    LiteralString,
-    Statement,
-)
+from enhanced_search.annotation import Annotation, AnnotationResult, LiteralString
 from enhanced_search.annotation.utils import convert_text_to_abstracted_string
 
 
@@ -33,7 +28,7 @@ class Pattern(ABC):
 
     def match(
         self, text: str, annotations: List[Annotation], literals: List[LiteralString]
-    ) -> List[Statement]:
+    ) -> List[dict]:
         """Checks the given text, if it fits the internal pattern.
         Returns a list of dictionaries, each holding context data of a single
         match within the text. If no match was found, the list is empty.
@@ -43,7 +38,7 @@ class Pattern(ABC):
         )
         matches = self.regex_pattern.search(abstracted_matching_string)
 
-        return compile_result(matches, annotations, literals)
+        return compile_result(matches)
 
 
 class OnlyTaxonPattern(Pattern):
@@ -100,39 +95,6 @@ class TaxonNumericalPropertyPattern(Pattern):
     )
 
 
-def compile_result(
-    matches: Optional[RegexMatch],
-    annotations: List[Annotation],
-    literals: List[LiteralString],
-) -> List[Statement]:
-    """Uses the group names of the matches to generate a dict with all URI data.
-    The group names are used as keys. The value of the group should be that of
-    an Annotation ID. This way, the necessary Annotation is retrieved and added as
-    value.
-    """
-    if matches is None:
-        return []
-
-    words = annotations + literals
-    word_index = {word.id: word for word in words}
-
-    context = []
-    statement = Statement()
-    for name, word_id in matches.groupdict().items():
-        word = word_index.get(word_id)
-
-        if isinstance(word, Annotation):
-            value = word.uris
-        else:
-            value = word
-
-        statement.__dict__[name] = value
-
-    context.append(statement)
-
-    return context
-
-
 class PatternDependencyAnnotationEngine:
     """Inferences semantic relationships between Annotations and returns them
     as Statement.
@@ -170,5 +132,19 @@ class PatternDependencyAnnotationEngine:
         annotation_result.annotation_relationships = statements
 
 
+def compile_result(matches: Optional[RegexMatch]) -> List[dict]:
+    """Uses the group names of the matches to generate a dict with all URI data.
+    The group names are used as keys. The value of the group is that of
+    an Annotation ID.
+    """
+    if matches is None:
+        return []
 
+    context = []
+    statement = {}
+    for name, word_id in matches.groupdict().items():
+        statement[name] = word_id
 
+    context.append(statement)
+
+    return context

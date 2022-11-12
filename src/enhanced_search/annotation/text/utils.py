@@ -1,15 +1,16 @@
 import json
 import shlex
 from copy import deepcopy
-from typing import Generator, Tuple, List
+from typing import Generator, List, Tuple
 
 from enhanced_search import configuration as config
-from enhanced_search.annotation import NamedEntityType, Annotation
+from enhanced_search.annotation import Annotation, NamedEntityType, Word
 
 named_entity_mapping = {
     config.PLANT_ANNOTATION_STRING.lower(): NamedEntityType.PLANT,
     config.ANIMAL_ANNOTATION_STRING.lower(): NamedEntityType.ANIMAL,
     config.LOCATION_ANNOTATION_STRING.lower(): NamedEntityType.LOCATION,
+    config.MISC_ANNOTATION_STRING.lower(): NamedEntityType.MISCELLANEOUS,
     "plant": NamedEntityType.PLANT,
     "animal": NamedEntityType.ANIMAL,
     "location": NamedEntityType.LOCATION,
@@ -58,37 +59,26 @@ def sort_named_entities_by_priority(named_entity_type_string: str) -> int:
     )
 
 
-def tokenize_text(text: str) -> List[str]:
+def tokenize_text(text: str, keep_quotations: bool = False) -> List[str]:
     """Splits a given text by whitespaces, but preserves quoted strings."""
-    return shlex.split(text)
+    return shlex.split(text, posix=not keep_quotations)
 
 
-def stream_words_from_query(text: str) -> Generator[Tuple[str, int, int], None, None]:
-    """Returns substrings of the given query in a deterministic order.
+def stream_words_from_tokens(
+    tokens: List[Word],
+) -> Generator[Tuple[str, str], None, None]:
+    """Returns strings by concatenating the given tokens in a deterministic order.
     Characters like question marks (?) and exclamation marks (!) are removed from a
-    returned word. The word are returned with its original case, no general lower
+    returned word. The words are returned with its original case, no general lower
     casing.
     """
-    tokens = tokenize_text(text)
-    strip_characters = "?! "
+    for index, token in enumerate(tokens):
+        for text in {token.text, token.lemma}:
+            yield text, token.begin, token.end
 
-    current_start_position = 0
-    for index, starting_token in enumerate(tokens):
-        text = starting_token.strip(strip_characters)
-
-        token_length = len(text)
-        current_end_position = current_start_position + token_length
-
-        yield text, current_start_position, current_end_position
-
-        for extending_token in tokens[index + 1 :]:
-            extending_token = extending_token.strip(strip_characters)
-            text = " ".join((text, extending_token))
-            current_end_position += len(extending_token) + 1  # +1: Added whitespace
-
-            yield text, current_start_position, current_end_position
-
-        current_start_position += token_length + 1
+            for extending_token in tokens[index + 1 :]:
+                text += f" {extending_token.text}"
+                yield text, token.begin, extending_token.end
 
 
 def update_annotation_with_data(

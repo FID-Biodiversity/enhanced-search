@@ -1,5 +1,8 @@
-from typing import Protocol
+import json
 
+import pathlib
+from typing import Protocol, Optional
+from functools import singledispatchmethod
 from redis import Redis
 
 
@@ -53,7 +56,7 @@ class RedisDatabase:
 
         self._db = self._create_redis_connection()
 
-    def read(self, query: str, is_safe: bool = False) -> str:
+    def read(self, query: str, is_safe: bool = False) -> Optional[str]:
         """Get the associated value for the given query ("key").
         :param query: The key value to look up.
         :param is_safe: If True, no sanitizing will be done. Otherwise,
@@ -83,3 +86,45 @@ class RedisDatabase:
         return Redis(**parameters)
 
 
+class SimpleKeyValueDatabase:
+    """A simple wrapper around a dictionary.
+
+    Should NOT be used in production!
+    """
+
+    def __init__(self, data: Optional[dict] = None):
+        self._db = data if data is not None else {}
+
+    def read(self, query: str, is_safe: bool = False) -> Optional[str]:
+        """Get the associated value for the given query ("key").
+        :param query: The key value to look up.
+        :param is_safe: If True, no sanitizing will be done. Otherwise,
+                potential malicious characters are stripped (Default).
+        """
+        if not is_safe:
+            query = self.sanitize_query(query)
+
+        return self._db.get(query)
+
+    def sanitize_query(self, text: str) -> str:
+        """In this Database, it does nothing."""
+        return text
+
+    @singledispatchmethod
+    def parse_data(self, data) -> None:
+        """Reads data to the database."""
+        raise TypeError(f"The data type of {type(data)} is not supported!")
+
+    @parse_data.register
+    def _(self, data: dict) -> None:
+        """Reads the data directly into the database."""
+        self._db.update(data)
+
+    @parse_data.register
+    def _(self, json_data_path: pathlib.Path) -> None:
+        """Reads the data from a given json-file into the database."""
+        with open(json_data_path, 'r') as f:
+            data_string = f.read()
+            data = json.loads(data_string)
+
+        self.parse_data(data)

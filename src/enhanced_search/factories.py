@@ -2,18 +2,21 @@
 
 import importlib
 from copy import deepcopy
-from typing import Any, Optional, Type
+from typing import Any, List, Optional, Type
 
 from enhanced_search import configuration as config
 from enhanced_search.annotation.query.engines import SemanticEngine
-from enhanced_search.annotation.text import TextAnnotator, TextAnnotatorConfiguration
+from enhanced_search.annotation.text import TextAnnotator
 from enhanced_search.annotation.text.engines import (
-    StringBasedNamedEntityAnnotatorEngine,
+    AnnotationEngine,
+    DisambiguationAnnotationEngine,
     LiteralAnnotationEngine,
     PatternDependencyAnnotationEngine,
+    StringBasedNamedEntityAnnotatorEngine,
     UriLinkerAnnotatorEngine,
-    DisambiguationAnnotationEngine,
 )
+from enhanced_search.annotation.text.engines.lemmatizer import SimpleLemmatizer
+from enhanced_search.annotation.text.engines.tokenizer import SimpleTokenizer
 from enhanced_search.databases.interface import Database
 
 CLASS_PATH_KEYWORD = "class"
@@ -22,40 +25,43 @@ CLASS_PATH_KEYWORD = "class"
 class TextAnnotatorFactory:
     """A simple factory that takes care of all the configuration of a TextAnnotator."""
 
+    DEFAULT_KEY_VALUE_DATABASE_NAME = "key-value"
+
     def create(self) -> TextAnnotator:
         """Create a new TextAnnotator object."""
         configuration = self._get_default_configuration()
         return self.create_by_configuration(configuration)
 
+    @staticmethod
     def create_by_configuration(
-        self, configuration: TextAnnotatorConfiguration
+        engines: List[AnnotationEngine]
     ) -> TextAnnotator:
         """Creates a TextAnnotator object by the given configuration."""
-        return TextAnnotator(configuration)
+        return TextAnnotator(engines)
 
     def _get_default_configuration(self):
         database_factory = DatabaseFactory()
 
         try:
-            key_value_db = database_factory.create("key-value")
-            ne_engine = StringBasedNamedEntityAnnotatorEngine(db=key_value_db)
-            literal_engine = LiteralAnnotationEngine()
-            dependency_parser = PatternDependencyAnnotationEngine()
-            entity_linker = UriLinkerAnnotatorEngine(db=key_value_db)
-            disambiguation_engine = DisambiguationAnnotationEngine()
-
-            return TextAnnotatorConfiguration(
-                dependency_recognition=dependency_parser,
-                disambiguation_engine=disambiguation_engine,
-                entity_linker=entity_linker,
-                literal_recognition=literal_engine,
-                named_entity_recognition=ne_engine,
-            )
+            key_value_db = database_factory.create(self.DEFAULT_KEY_VALUE_DATABASE_NAME)
         except KeyError:
-            raise RuntimeError(
-                "There is no default database available for the"
-                "TextAnnotator to be instantiated!"
-            )
+            key_value_db = self._create_fallback_database()
+
+        return [
+            SimpleTokenizer(),
+            SimpleLemmatizer(),
+            StringBasedNamedEntityAnnotatorEngine(db=key_value_db),
+            LiteralAnnotationEngine(),
+            PatternDependencyAnnotationEngine(),
+            DisambiguationAnnotationEngine(),
+            UriLinkerAnnotatorEngine(db=key_value_db),
+        ]
+
+    def _create_fallback_database(self) -> Database:
+        key_value_db_instance = load_class(config.FALLBACK_DATABASE_CLASS, Database)
+        db = key_value_db_instance()
+        db.parse_data(config.FALLBACK_DATABASE_DATA)
+        return db
 
 
 class SemanticEngineFactory:

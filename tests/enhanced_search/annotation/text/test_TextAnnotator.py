@@ -14,6 +14,7 @@ class TestTextAnnotator:
                         begin=10,
                         end=25,
                         text="Fagus Sylvatica",
+                        lemma="Fagus Sylvatica",
                         named_entity_type=NamedEntityType.PLANT,
                         uris={
                             Uri(url="https://www.biofid.de/ontology/fagus_sylvatica")
@@ -32,15 +33,17 @@ class TestTextAnnotator:
                         begin=0,
                         end=5,
                         text="Paris",
+                        lemma="Paris",
                         named_entity_type=NamedEntityType.PLANT,
                         uris={
-                            Uri(url="https://www.biofid.de/ontology/fagus_sylvatica")
+                            Uri(url="https://www.biofid.de/ontology/paris")
                         },
                     ),
                     Annotation(
                         begin=9,
                         end=14,
                         text="Paris",
+                        lemma="Paris",
                         named_entity_type=NamedEntityType.LOCATION,
                         uris={Uri(url="https://sws.geonames.org/paris")},
                     ),

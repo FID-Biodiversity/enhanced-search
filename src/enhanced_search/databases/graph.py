@@ -1,5 +1,5 @@
 import json
-from typing import Protocol
+from typing import Protocol, Optional
 
 from SPARQLWrapper import SPARQLWrapper
 
@@ -10,9 +10,12 @@ class KnowledgeDatabase(Protocol):
     Obeys the Database interface.
     """
 
-    def read(self, query: str, *args, **kwargs) -> str:
+    def read(self, query: str, *args, **kwargs) -> Optional[str]:
         """Queries a database with the given query string and
         parameters and returns the retrieved data as string.
+
+        This function may return None, if no corresponding data
+        could be retrieved.
         """
 
     def sanitize_query(self, text: str) -> str:

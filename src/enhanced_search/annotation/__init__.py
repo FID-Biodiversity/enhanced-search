@@ -1,3 +1,19 @@
+"""Annotation Module
+
+The Annotation module holds a text annotation pipeline and a query processing module.
+The text annotation pipeline is split into the TextAnnotator, which is the
+conductor for the text annotation, and the engines. The engines process the
+single steps in the text annotation and can be customized and put into a specific
+order to achieve the desired outcome.
+
+The query processing is split into the processor, which has the corresponding task
+to the TextAnnotator, only on the query level, and the engines. On the query
+level the engines have the task to enrich the query with further data, if necessary.
+
+This module also holds some dataclasses for allowing an isolated communication between
+the single engines and the TextAnnotator.
+"""
+
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional, Set, Union
@@ -39,11 +55,14 @@ class Word:
 
     @property
     def id(self):
+        """The Word's ID."""
         return f"{self.begin}/{self.end}"
 
     begin: int
     end: int
     text: str
+    lemma: Optional[str] = None
+    is_quoted: bool = False
 
     def __hash__(self):
         return hash((self.begin, self.end, self.text))
@@ -100,13 +119,14 @@ class Statement:
 class AnnotationResult:
     """Holds the current state of the annotation process."""
 
+    tokens: List[LiteralString] = field(default_factory=list)
     named_entity_recognition: List[Annotation] = field(default_factory=list)
     literals: List[LiteralString] = field(default_factory=list)
     entity_linking: Dict[Annotation, List[Uri]] = field(default_factory=dict)
     disambiguated_annotations: Dict[Annotation, Annotation] = field(
         default_factory=dict
     )
-    annotation_relationships: List[Statement] = field(default_factory=list)
+    annotation_relationships: List[dict] = field(default_factory=list)
 
 
 @dataclass

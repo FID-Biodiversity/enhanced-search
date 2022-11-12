@@ -5,7 +5,7 @@ import pathlib
 import pytest
 
 from enhanced_search import configuration as config
-from enhanced_search.annotation.text import TextAnnotator, TextAnnotatorConfiguration
+from enhanced_search.annotation.text import TextAnnotator
 from enhanced_search.annotation.text.engines import (
     DisambiguationAnnotationEngine,
     LiteralAnnotationEngine,
@@ -13,6 +13,8 @@ from enhanced_search.annotation.text.engines import (
     StringBasedNamedEntityAnnotatorEngine,
     UriLinkerAnnotatorEngine,
 )
+from enhanced_search.annotation.text.engines.lemmatizer import SimpleLemmatizer
+from enhanced_search.annotation.text.engines.tokenizer import SimpleTokenizer
 from tests.dummies import DummyKeyValueDatabase, DummySparqlKnowledgeDatabase
 
 
@@ -52,7 +54,7 @@ def set_database_configuration(default_n_triples_source_path):
         },
         "key-value": {
             "class": "tests.dummies.DummyKeyValueDatabase",
-        }
+        },
     }
 
     config.SEMANTIC_ENGINES = {
@@ -89,25 +91,22 @@ def loaded_key_value_database():
     """A key-value database occupied with some hardcoded data.
     All keys are in lowercase."""
     db = DummyKeyValueDatabase()
-    db.data = {
-        "quercus": '{"Plant_Flora": '
-        '[["https://www.biofid.de/ontology/quercus", 3]]}',
-        "quercus sylvestris": '{"Plant_Flora": '
-        '[["https://www.biofid.de/ontology/quercus_sylvestris", 3]]}',
-        "fagus": '{"Plant_Flora": ' '[["https://www.biofid.de/ontology/fagus", 3]]}',
-        "fagus sylvatica": '{"Plant_Flora": '
-        '[["https://www.biofid.de/ontology/fagus_sylvatica", 3]]}',
-        "deutschland": '{"Location_Place": [['
-        '"https://sws.geonames.org/deutschland", 3]]}',
-        "paris": '{"Location_Place": [["https://sws.geonames.org/paris", 3]],'
-        '"Plant_Flora": [["https://www.biofid.de/ontology/fagus_sylvatica"'
-        ", 3]]}",
-    }
+    db.data = config.FALLBACK_DATABASE_DATA
 
     return db
 
 
 # ANNOTATOR ENGINES #
+@pytest.fixture(scope="session")
+def simple_tokenizer():
+    return SimpleTokenizer()
+
+
+@pytest.fixture(scope="session")
+def simple_lemmatizer():
+    return SimpleLemmatizer()
+
+
 @pytest.fixture(scope="session")
 def string_based_ne_annotator_engine(loaded_key_value_database):
     """A Named Entity AnnotationEngine."""
@@ -144,18 +143,22 @@ def literal_annotator_engine():
 
 @pytest.fixture
 def text_annotator(
+    simple_tokenizer,
+    simple_lemmatizer,
     string_based_ne_annotator_engine,
     uri_linker_annotator_engine,
     disambiguation_annotator_engine,
     literal_annotator_engine,
-    pattern_dependency_annotator_engine
+    pattern_dependency_annotator_engine,
 ):
     """A TextAnnotator that can analyse a Query object."""
-    configuration = TextAnnotatorConfiguration(
-        named_entity_recognition=string_based_ne_annotator_engine,
-        entity_linker=uri_linker_annotator_engine,
-        disambiguation_engine=disambiguation_annotator_engine,
-        literal_recognition=literal_annotator_engine,
-        dependency_recognition=pattern_dependency_annotator_engine,
-    )
-    return TextAnnotator(configuration)
+    engines = [
+        simple_tokenizer,
+        simple_lemmatizer,
+        string_based_ne_annotator_engine,
+        literal_annotator_engine,
+        uri_linker_annotator_engine,
+        disambiguation_annotator_engine,
+        pattern_dependency_annotator_engine,
+    ]
+    return TextAnnotator(engines)

@@ -102,13 +102,7 @@ class TestPatternDependencyAnnotationEngine:
                         LiteralString(begin=9, end=12, text="mit", is_safe=False)
                     ],
                 ),
-                [
-                    Statement(
-                        subject={Uri("https://www.biofid.de/ontology/pflanzen")},
-                        predicate={Uri("https://pato.org/flower_part", 2)},
-                        object={Uri("https://pato.org/red_color", 3)},
-                    )
-                ],
+                [{"subject": "0/8", "predicate": "19/25", "object": "13/18"}],
             ),
             (  # Scenario - A taxon with a filtering property (one is a user set value)
                 "Pflanzen mit 3 Kelchblättern",
@@ -140,16 +134,11 @@ class TestPatternDependencyAnnotationEngine:
                     ],
                 ),
                 [
-                    Statement(
-                        subject={Uri("https://www.biofid.de/ontology/pflanzen")},
-                        predicate={
-                            Uri(
-                                "https://pato.org/has_petal_count",
-                                position_in_triple=2,
-                            )
-                        },
-                        object=LiteralString(begin=13, end=14, text="3"),
-                    )
+                    {
+                        "subject": "0/8",
+                        "predicate": "15/28",
+                        "object": "13/14",
+                    }
                 ],
             ),
             (  # Scenario - An ambitious annotation is enriched
@@ -196,16 +185,11 @@ class TestPatternDependencyAnnotationEngine:
                     ],
                 ),
                 [
-                    Statement(
-                        subject={Uri("https://www.biofid.de/ontology/paris")},
-                        predicate={
-                            Uri(
-                                "https://pato.org/flower_part",
-                                position_in_triple=2,
-                            )
-                        },
-                        object={Uri("https://pato.org/green_color")},
-                    )
+                    {
+                        "subject": "0/5",
+                        "predicate": "17/23",
+                        "object": "10/16",
+                    }
                 ],
             ),
         ],

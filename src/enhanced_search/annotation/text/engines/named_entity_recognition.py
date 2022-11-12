@@ -1,7 +1,11 @@
-from enhanced_search.annotation import Annotation, AnnotationResult
+import token
+
+from typing import Optional, Tuple
+
+from enhanced_search.annotation import Annotation, AnnotationResult, Word
 from enhanced_search.databases import KeyValueDatabase
 
-from ..utils import stream_words_from_query, update_annotation_with_data
+from ..utils import update_annotation_with_data
 
 
 class StringBasedNamedEntityAnnotatorEngine:
@@ -19,42 +23,57 @@ class StringBasedNamedEntityAnnotatorEngine:
     def __init__(self, db: KeyValueDatabase):
         self._db = db
 
-    def parse(self, text: str, annotations: AnnotationResult) -> None:
+    def parse(self, text: str, annotation_result: AnnotationResult) -> None:
         """Provide the text and the current state (the AnnotationResult) of
         the annotations to this AnnotationEngine.
         The method updates the AnnotationResult object.
         """
-        previous_token_data = None
         retrieved_annotations = []
-        end_of_last_complete_named_entity = 0
 
-        for word, begin, end in stream_words_from_query(text):
-            lowered_word = word.lower()
-            if begin < end_of_last_complete_named_entity or not self._is_word_valid(
-                lowered_word
-            ):
-                continue
+        for index, token in enumerate(annotation_result.tokens):
+            _, text, corresponding_data = self._get_data_for_token(token)
 
-            corresponding_data = self._db.read(lowered_word)
-
+            annotation_data = []
             if corresponding_data is not None:
-                previous_token_data = (begin, end, word, corresponding_data)
-            elif previous_token_data is not None:
-                ann = self._create_annotation(*previous_token_data)
+                annotation_data.append((token, text, corresponding_data))
+
+            # Quoted strings should be taken as encapsulated entities
+            if text is not None and not token.is_quoted:
+                for following_token in annotation_result.tokens[index + 1 :]:
+                    text += f" {following_token.text}"
+                    extended_word_data = self._db.read(text.lower())
+                    if extended_word_data is not None:
+                        annotation_data.append(
+                            (following_token, text, extended_word_data)
+                        )
+                    else:
+                        break
+
+            if annotation_data:
+                relevant_data = annotation_data[-1]
+                ann = self._create_annotation(token, *relevant_data)
                 retrieved_annotations.append(ann)
 
-                end_of_last_complete_named_entity = previous_token_data[1]
-                previous_token_data = None
-        else:
-            # The for-loop is done! Clean up any remaining annotations!
-            if previous_token_data is not None:
-                ann = self._create_annotation(*previous_token_data)
-                retrieved_annotations.append(ann)
+        annotation_result.named_entity_recognition = retrieved_annotations
 
-        annotations.named_entity_recognition = retrieved_annotations
+    def _get_data_for_token(
+        self, token: Word
+    ) -> Tuple[Optional[Word], Optional[str], Optional[str]]:
+        for test_string in [token.text, token.lemma]:
+            if self._is_word_valid(test_string):
+                corresponding_data = self._db.read(test_string.lower())
+                if corresponding_data is not None:
+                    return token, test_string, corresponding_data
 
-    def _create_annotation(self, begin: int, end: int, word: str, annotation_data: str):
-        annotation = Annotation(begin=begin, end=end, text=word)
+        return None, None, None
+
+    def _create_annotation(
+        self, start_token: Word, end_token: Word, text: str, annotation_data: str
+    ):
+        lemma = start_token.lemma if start_token == end_token else text
+        annotation = Annotation(
+            begin=start_token.begin, end=end_token.end, text=text, lemma=lemma
+        )
         update_annotation_with_data(annotation, annotation_data)
         return annotation
 

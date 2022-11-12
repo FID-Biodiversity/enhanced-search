@@ -1,3 +1,5 @@
+from typing import Optional
+
 import json
 
 from enhanced_search.annotation import Annotation, AnnotationResult, Uri
@@ -46,7 +48,7 @@ class UriLinkerAnnotatorEngine:
 
         linked_uri_data = {}
         for annotation in annotation_result.named_entity_recognition:
-            corresponding_data = self._db.read(annotation.text.lower())
+            corresponding_data = self._get_data_for_annotation_text(annotation)
 
             if corresponding_data is not None:
                 annotation_data = json.loads(corresponding_data)
@@ -75,3 +77,11 @@ class UriLinkerAnnotatorEngine:
             update_uri_data[normalized_ne_string] = uris
 
         linked_uri_data[annotation.id] = update_uri_data
+
+    def _get_data_for_annotation_text(self, annotation: Annotation) -> Optional[str]:
+        for test_string in {annotation.text, annotation.lemma}:
+            corresponding_data = self._db.read(test_string.lower())
+            if corresponding_data is not None:
+                return corresponding_data
+
+        return None
