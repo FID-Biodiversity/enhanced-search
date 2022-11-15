@@ -302,5 +302,24 @@ config.SEMANTIC_ENGINES = {
 
 You can see, that we used the name "sparql" (case-sensitive!) to tell the semantic engine that it should use the database with the respective name, as defined in the `DATABASES` variable.
 
+
+## Development
+### Setup
+For any development, you need to install the development dependencies:
+
+```shell
+# When you are in the package root directory
+pip install -e .[dev]
+```
+
+### Running Tests
+When in the package root directory, simply call:
+
+```shell
+pytest
+```
+
+This should run the tests, test coverage, linters, and static testing tools.
+
 ## License
 ![AGPL-3.0 License](https://www.gnu.org/graphics/agplv3-88x31.png)
