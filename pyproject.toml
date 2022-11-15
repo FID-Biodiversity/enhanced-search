@@ -35,7 +35,9 @@ dev = [
     "isort",
     "flake8",
     "flake8-bugbear",
-    "rdflib"
+    "rdflib",
+    "safety",
+    "bandit"
 ]
 
 [tool.pytest.ini_options]
