@@ -1,3 +1,5 @@
+"""Some handy methods that are useful in several places within the package."""
+
 from typing import List, Union
 
 from enhanced_search.annotation import Annotation, LiteralString, Uri
@@ -25,9 +27,12 @@ def convert_text_to_abstracted_string(
 
     for token in sorted(tokens, key=lambda t: t.begin, reverse=True):
         if isinstance(token, Annotation):
-            substitution_text = (
-                f"{{{token.named_entity_type.value.lower()}" f"<{token.id}>}}"
+            text = (
+                token.named_entity_type.value.lower()
+                if token.named_entity_type is not None
+                else token.text
             )
+            substitution_text = f"{{{text}" f"<{token.id}>}}"
         elif isinstance(token, LiteralString):
             substitution_text = f"{token.text}<{token.id}>"
         else:

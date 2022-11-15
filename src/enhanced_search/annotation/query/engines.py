@@ -1,16 +1,18 @@
-from copy import deepcopy
+"""The definitions of all engines running the query enrichment."""
 
 import json
-from SPARQLBurger.SPARQLQueryBuilder import SPARQLSelectQuery, SPARQLGraphPattern
+from copy import deepcopy
+from typing import List, Protocol, runtime_checkable
+
+from SPARQLBurger.SPARQLQueryBuilder import SPARQLGraphPattern, SPARQLSelectQuery
 from SPARQLBurger.SPARQLSyntaxTerms import Prefix, Triple
-from typing import Protocol, runtime_checkable, List
 
 from enhanced_search.annotation import (
+    LiteralString,
+    NamedEntityType,
     Query,
     Statement,
-    LiteralString,
     Uri,
-    NamedEntityType,
 )
 from enhanced_search.annotation.utils import prepare_value_for_sparql
 from enhanced_search.databases import KnowledgeDatabase
@@ -42,7 +44,11 @@ class SparqlSemanticEngine:
         )
 
         db_response_string = self._database.read(sparql_query)
-        data = self._extract_data_from_response(db_response_string)
+
+        if db_response_string is not None:
+            data = self._extract_data_from_response(db_response_string)
+        else:
+            data = {}
 
         return self._generate_result(query, data, taxon_variable_name)
 
