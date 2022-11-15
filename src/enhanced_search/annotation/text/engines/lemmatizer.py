@@ -18,8 +18,11 @@ class SimpleLemmatizer:
 
     def parse(self, text: str, annotation_result: AnnotationResult) -> None:
         """Add a lemma to the each Annotations."""
+        language = (
+            annotation_result.text_language
+            if annotation_result.text_language is not None
+            else self.DEFAULT_LANGUAGE
+        )
+
         for token in annotation_result.tokens:
-            token.lemma = simplemma.lemmatize(
-                token.text, lang=self.DEFAULT_LANGUAGE
-            )
-            i = 1
+            token.lemma = simplemma.lemmatize(token.text, lang=language)
