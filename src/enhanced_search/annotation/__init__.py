@@ -119,6 +119,7 @@ class Statement:
 class AnnotationResult:
     """Holds the current state of the annotation process."""
 
+    text_language: Optional[str] = None
     tokens: List[LiteralString] = field(default_factory=list)
     named_entity_recognition: List[Annotation] = field(default_factory=list)
     literals: List[LiteralString] = field(default_factory=list)

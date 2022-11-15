@@ -13,6 +13,7 @@ from enhanced_search.annotation.text.engines import (
     StringBasedNamedEntityAnnotatorEngine,
     UriLinkerAnnotatorEngine,
 )
+from enhanced_search.annotation.text.engines.language import SimpleLanguageDetector
 from enhanced_search.annotation.text.engines.lemmatizer import SimpleLemmatizer
 from enhanced_search.annotation.text.engines.tokenizer import SimpleTokenizer
 from tests.dummies import DummyKeyValueDatabase, DummySparqlKnowledgeDatabase
@@ -105,6 +106,11 @@ def simple_tokenizer():
 @pytest.fixture(scope="session")
 def simple_lemmatizer():
     return SimpleLemmatizer()
+
+
+@pytest.fixture(scope="session")
+def simple_language_detector():
+    return SimpleLanguageDetector()
 
 
 @pytest.fixture(scope="session")
