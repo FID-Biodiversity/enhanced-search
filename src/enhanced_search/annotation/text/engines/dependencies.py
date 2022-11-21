@@ -1,3 +1,5 @@
+"""Provides AnnotationEngines for deducing word dependencies in a text."""
+
 import re
 from abc import ABC
 from re import Match as RegexMatch

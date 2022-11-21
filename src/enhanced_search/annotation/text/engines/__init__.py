@@ -1,3 +1,5 @@
+"""The module containing all processing units (i.e. "engines") for a text annotation."""
+
 from typing import Protocol, runtime_checkable
 
 from enhanced_search.annotation import AnnotationResult

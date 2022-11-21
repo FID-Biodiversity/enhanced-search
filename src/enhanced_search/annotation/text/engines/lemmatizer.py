@@ -1,3 +1,5 @@
+"""Provides AnnotationEngines to lemmatize words in a text."""
+
 import simplemma
 
 from enhanced_search.annotation import AnnotationResult
@@ -25,4 +27,11 @@ class SimpleLemmatizer:
         )
 
         for token in annotation_result.tokens:
-            token.lemma = simplemma.lemmatize(token.text, lang=language)
+            text = token.text
+
+            if text.lower() in ["der", "die", "das"]:
+                # Catch issue in simplemma
+                # (https://github.com/adbar/simplemma/issues/28)
+                token.lemma = text
+            else:
+                token.lemma = simplemma.lemmatize(token.text, lang=language)
