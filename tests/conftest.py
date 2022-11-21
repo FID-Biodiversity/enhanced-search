@@ -17,7 +17,7 @@ from enhanced_search.annotation.text.engines.language import SimpleLanguageDetec
 from enhanced_search.annotation.text.engines.lemmatizer import SimpleLemmatizer
 from enhanced_search.annotation.text.engines.tokenizer import SimpleTokenizer
 from tests.dummies import DummyKeyValueDatabase, DummySparqlKnowledgeDatabase
-import fakeredis
+
 
 # PATHS #
 @pytest.fixture(scope="session")
