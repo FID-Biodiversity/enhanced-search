@@ -17,7 +17,7 @@ from enhanced_search.annotation.text.engines.language import SimpleLanguageDetec
 from enhanced_search.annotation.text.engines.lemmatizer import SimpleLemmatizer
 from enhanced_search.annotation.text.engines.tokenizer import SimpleTokenizer
 from tests.dummies import DummyKeyValueDatabase, DummySparqlKnowledgeDatabase
-
+import fakeredis
 
 # PATHS #
 @pytest.fixture(scope="session")
@@ -94,6 +94,13 @@ def loaded_key_value_database():
     db = DummyKeyValueDatabase()
     db.data = config.FALLBACK_DATABASE_DATA
 
+    return db
+
+
+@pytest.fixture
+def empty_redis_db():
+    """Uses Fakeredis to emulate Redis behaviour."""
+    db = fakeredis.FakeStrictRedis(version=6)
     return db
 
 

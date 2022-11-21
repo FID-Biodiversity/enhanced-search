@@ -29,20 +29,22 @@ exclude = ["tests*"]
 dev = [
     "pytest>=7.0",
     "pytest-mypy",
+    "types-redis", # Redis type hints for mypy
     "pytest-cov",
     "pytest-pylint",
     "black",
     "isort",
     "flake8",
     "flake8-bugbear",
-    "rdflib",
     "safety",
-    "bandit"
+    "bandit",
+    "rdflib",
+    "fakeredis",
 ]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "--mypy --pylint -ra -q --cov --cov-report term-missing --cov-fail-under 95 ./src ./tests"
+addopts = "--mypy --pylint ./src -ra -q --cov --cov-report term-missing --cov-fail-under 95"
 testpaths = [
     "tests"
 ]

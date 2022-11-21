@@ -7,6 +7,9 @@ To set the databases appropriately, you even need to do this by specifying the d
 for DATABASES and SEMANTIC_ENGINES. How to configure these two, you can see in the
 classes "factories.DatabaseFactory" and "factories.SemanticEngineFactory", respectively.
 """
+# General
+UTF8_STRING = "utf-8"
+
 
 # Annotations
 PLANT_ANNOTATION_STRING = "Plant_Flora"
