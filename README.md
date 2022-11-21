@@ -310,6 +310,7 @@ For any development, you need to install the development dependencies:
 ```shell
 # When you are in the package root directory
 pip install -e .[dev]
+pre-commit install  # Install pre-commit hooks
 ```
 
 ### Running Tests
