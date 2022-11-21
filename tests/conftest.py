@@ -97,13 +97,6 @@ def loaded_key_value_database():
     return db
 
 
-@pytest.fixture
-def empty_redis_db():
-    """Uses Fakeredis to emulate Redis behaviour."""
-    db = fakeredis.FakeStrictRedis(version=6)
-    return db
-
-
 # ANNOTATOR ENGINES #
 @pytest.fixture(scope="session")
 def simple_tokenizer():

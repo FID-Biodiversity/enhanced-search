@@ -1,3 +1,4 @@
+import fakeredis
 import pytest
 
 from enhanced_search.databases.key_value import RedisDatabase
@@ -32,3 +33,10 @@ class TestRedisDatabase:
         empty_redis_db.set(b"somethingwith-colon", b"Something with colon")
 
         return empty_redis_db
+
+    @pytest.fixture
+    def empty_redis_db(self):
+        """Uses Fakeredis to emulate Redis behaviour.
+        This instance returns string responses instead of bytes!"""
+        db = fakeredis.FakeStrictRedis(version=6, decode_responses=True)
+        return db

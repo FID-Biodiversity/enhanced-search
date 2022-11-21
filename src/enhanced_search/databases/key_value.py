@@ -67,9 +67,7 @@ class RedisDatabase:
         if not is_safe:
             query = self.sanitize_query(query)
 
-        response = self._db.get(query)
-
-        return response if response is None else response.decode()
+        return self._db.get(query)
 
     def sanitize_query(self, text: str) -> str:
         """Strips potentially malicious string from the text."""
