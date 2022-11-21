@@ -187,10 +187,10 @@ class TestStringEscaping:
         ["text", "expected_output"],
         [
             ("Das ist ein Test", "Das ist ein Test"),
-            ("Das ist ein Test!", "Das ist ein Test\!"),
+            ("Das ist ein Test!", "Das ist ein Test\\!"),
             (
                 "H3r& #r3 $ome '}haracters' \"for\" %escaping",
-                "H3r\& \#r3 \$ome \\'\}haracters\\' \\\"for\\\" \%escaping",
+                "H3r\\& \\#r3 \\$ome \\'\\}haracters\\' \\\"for\\\" \\%escaping",
             ),
         ],
     )
@@ -202,10 +202,10 @@ class TestStringEscaping:
         ["text", "expected_output"],
         [
             ("Das ist ein Test", "Das ist ein Test"),
-            ("Das ist ein Test!", "Das ist ein Test\!"),
+            ("Das ist ein Test!", "Das ist ein Test\\!"),
             (
                 "H3r& #r3 $ome '}haracters' \"for\" %escaping",
-                "H3r\& \#r3 \$ome '\}haracters' \"for\" \%escaping",
+                "H3r\\& \\#r3 \\$ome '\\}haracters' \"for\" \\%escaping",
             ),
         ],
     )

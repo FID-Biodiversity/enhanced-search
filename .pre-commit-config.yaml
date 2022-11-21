@@ -18,3 +18,5 @@ repos:
     rev: 1.7.4
     hooks:
       - id: bandit
+        language_version: python3
+        exclude: ^tests/
