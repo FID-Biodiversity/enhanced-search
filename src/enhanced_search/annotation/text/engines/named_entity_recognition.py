@@ -1,9 +1,9 @@
-import token
+"""Provides AnnotationEngines for Named Entity Recognition in a text."""
 
 from typing import Optional, Tuple
 
 from enhanced_search.annotation import Annotation, AnnotationResult, Word
-from enhanced_search.databases import KeyValueDatabase
+from enhanced_search.databases.key_value import KeyValueDatabase
 
 from ..utils import update_annotation_with_data
 
@@ -23,7 +23,7 @@ class StringBasedNamedEntityAnnotatorEngine:
     def __init__(self, db: KeyValueDatabase):
         self._db = db
 
-    def parse(self, text: str, annotation_result: AnnotationResult) -> None:
+    def parse(self, _: str, annotation_result: AnnotationResult) -> None:
         """Provide the text and the current state (the AnnotationResult) of
         the annotations to this AnnotationEngine.
         The method updates the AnnotationResult object.
@@ -31,46 +31,62 @@ class StringBasedNamedEntityAnnotatorEngine:
         retrieved_annotations = []
 
         for index, token in enumerate(annotation_result.tokens):
-            _, text, corresponding_data = self._get_data_for_token(token)
+            inferenced_text, corresponding_data = self._get_data_for_token(token)
 
             annotation_data = []
-            if corresponding_data is not None:
-                annotation_data.append((token, text, corresponding_data))
+            if corresponding_data is not None and inferenced_text is not None:
+                annotation_data.append((token, inferenced_text, corresponding_data))
 
             # Quoted strings should be taken as encapsulated entities
-            if text is not None and not token.is_quoted:
+            if inferenced_text is not None and not token.is_quoted:
                 for following_token in annotation_result.tokens[index + 1 :]:
-                    text += f" {following_token.text}"
-                    extended_word_data = self._db.read(text.lower())
+                    inferenced_text += f" {following_token.text}"
+                    extended_word_data = self._db.read(inferenced_text.lower())
                     if extended_word_data is not None:
                         annotation_data.append(
-                            (following_token, text, extended_word_data)
+                            (following_token, inferenced_text, extended_word_data)
                         )
                     else:
                         break
 
             if annotation_data:
                 relevant_data = annotation_data[-1]
-                ann = self._create_annotation(token, *relevant_data)
+                end_token, word_text, data = relevant_data
+                ann = self._create_annotation(token, end_token, word_text, data)
                 retrieved_annotations.append(ann)
 
         annotation_result.named_entity_recognition = retrieved_annotations
 
-    def _get_data_for_token(
-        self, token: Word
-    ) -> Tuple[Optional[Word], Optional[str], Optional[str]]:
-        for test_string in [token.text, token.lemma]:
+    def _get_data_for_token(self, token: Word) -> Tuple[Optional[str], Optional[str]]:
+        # Always test the original text first!
+        strings = [string for string in [token.text, token.lemma] if string is not None]
+
+        for test_string in strings:
             if self._is_word_valid(test_string):
                 corresponding_data = self._db.read(test_string.lower())
                 if corresponding_data is not None:
-                    return token, test_string, corresponding_data
+                    return test_string, corresponding_data
 
-        return None, None, None
+        return None, None
 
     def _create_annotation(
-        self, start_token: Word, end_token: Word, text: str, annotation_data: str
+        self,
+        start_token: Word,
+        end_token: Word,
+        text: str,
+        annotation_data: str,
     ):
-        lemma = start_token.lemma if start_token == end_token else text
+        def is_multi_token_word():
+            return start_token != end_token
+
+        if is_multi_token_word():
+            lemma = text
+        else:
+            lemma = (
+                start_token.lemma if start_token.lemma is not None else start_token.text
+            )
+            text = start_token.text
+
         annotation = Annotation(
             begin=start_token.begin, end=end_token.end, text=text, lemma=lemma
         )

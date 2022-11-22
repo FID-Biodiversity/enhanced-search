@@ -67,7 +67,7 @@ warn_unused_configs = true
 
 [tool.pylint]
 ignore-patterns = "test_.*?py"
-disable = ["W0621", "R0903"]
+disable = ["W0621", "R0903", "C0208", "W0108"]
 good-names = [
     "db",
     "id",

@@ -1,7 +1,9 @@
+"""Some handy methods that are shared between multiple moduless."""
+
 import json
 import shlex
 from copy import deepcopy
-from typing import Generator, List, Tuple
+from typing import Generator, List, Set, Tuple
 
 from enhanced_search import configuration as config
 from enhanced_search.annotation import Annotation, NamedEntityType, Word
@@ -66,19 +68,36 @@ def tokenize_text(text: str, keep_quotations: bool = False) -> List[str]:
 
 def stream_words_from_tokens(
     tokens: List[Word],
-) -> Generator[Tuple[str, str], None, None]:
+) -> Generator[Tuple[str, int, int], None, None]:
     """Returns strings by concatenating the given tokens in a deterministic order.
+
     Characters like question marks (?) and exclamation marks (!) are removed from a
     returned word. The words are returned with its original case, no general lower
     casing.
+
+    A token is tested for both its text and its lemma. If both are the same, only one
+    is applied.
+
+    Returns:
+        A tuple holding a concatenated string, the beginning position and the end
+        position - in this order.
     """
     for index, token in enumerate(tokens):
-        for text in {token.text, token.lemma}:
+        token_strings = get_word_text_and_lemma_set(token)
+
+        for text in token_strings:
             yield text, token.begin, token.end
 
             for extending_token in tokens[index + 1 :]:
                 text += f" {extending_token.text}"
                 yield text, token.begin, extending_token.end
+
+
+def get_word_text_and_lemma_set(word: Word) -> Set[str]:
+    """Creates a set holding both text and lemma of the given word.
+    Guarantees to not contain None as value.
+    """
+    return {string for string in {word.text, word.lemma} if string is not None}
 
 
 def update_annotation_with_data(
@@ -99,8 +118,9 @@ def update_annotation_with_data(
 
     original_annotation = annotation
     counter = 0
-    for named_entity_type_string, data in sorted(
-        json_data.items(), key=lambda item: sort_named_entities_by_priority(item[0])
+    for named_entity_type_string in sorted(
+        json_data.keys(),
+        key=lambda item_key: sort_named_entities_by_priority(item_key),
     ):
         if counter != 0:
             annotation = deepcopy(original_annotation)

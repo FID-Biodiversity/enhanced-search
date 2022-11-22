@@ -1,3 +1,5 @@
+"""A module that provides functionalities to annotate a text string."""
+
 from copy import copy
 from typing import Dict, List, Optional
 
@@ -39,7 +41,7 @@ def compile_annotations(result: AnnotationResult) -> AnnotationResult:
     )
 
     for annotation in result.named_entity_recognition:
-        uris_per_ne_type = result.entity_linking.get(annotation.id, {})
+        uris_per_ne_type: dict = result.entity_linking.get(annotation.id, {})
         uris = uris_per_ne_type.get(annotation.named_entity_type)
         if uris is not None:
             annotation.uris = uris

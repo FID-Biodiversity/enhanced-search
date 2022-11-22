@@ -13,6 +13,11 @@ class SimpleLemmatizer:
 
     If no language is given in the AnnotationResult, the fallback is German ('de').
 
+    Especially with all lowercase texts the lemmatization is tricky. There are at
+    least some potentially ambiguous words that can be noun or verb and hence
+    would have different lemmas (e.g. in German the "pflanze" could reference
+    "Pflanze" (noun) or "pflanzen" (verb)).
+
     Obeys the AnnotatorEngine interface!
     """
 
@@ -30,7 +35,7 @@ class SimpleLemmatizer:
             text = token.text
 
             if text.lower() in ["der", "die", "das"]:
-                # Catch issue in simplemma
+                # Catch issue in simplemma that will not be fixed.
                 # (https://github.com/adbar/simplemma/issues/28)
                 token.lemma = text
             else:

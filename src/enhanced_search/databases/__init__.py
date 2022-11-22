@@ -1,4 +1,6 @@
-from .key_value import RedisDatabase, KeyValueDatabase
-from .graph import SparqlGraphDatabase, KnowledgeDatabase
+"""Interfaces to talk to databases."""
 
-__all__ = [RedisDatabase, SparqlGraphDatabase]
+from .graph import SparqlGraphDatabase
+from .key_value import RedisDatabase
+
+__all__ = ["SparqlGraphDatabase", "RedisDatabase"]

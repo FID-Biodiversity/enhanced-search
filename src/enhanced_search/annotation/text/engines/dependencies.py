@@ -17,8 +17,8 @@ class Pattern(ABC):
     necessary in all patterns, but is useful in some (e.g. in situation, where there is
     negation).
 
-    To allow ambiguity in an annotation (e.g. a word is recognized both as plant and as a
-    location, the pattern matching has to catch cases like:
+    To allow ambiguity in an annotation (e.g. a word is recognized both as plant and
+    as a location, the pattern matching has to catch cases like:
         "{plant} in {plant|location}"
     Hence, all patterns should apply ".*?" within the curly brackets
     (i.e. "{.*?(?:taxon|plant|animal).*?}"), to consider this variability.
@@ -26,7 +26,7 @@ class Pattern(ABC):
     For testing the regex, you can use: https://regex101.com/
     """
 
-    regex_pattern: RegexPattern = None
+    regex_pattern: Optional[RegexPattern] = None
 
     def match(
         self, text: str, annotations: List[Annotation], literals: List[LiteralString]
@@ -35,6 +35,11 @@ class Pattern(ABC):
         Returns a list of dictionaries, each holding context data of a single
         match within the text. If no match was found, the list is empty.
         """
+        if self.regex_pattern is None:
+            raise NotImplementedError(
+                "You did not provide a `regex_pattern` variable for this class!"
+            )
+
         abstracted_matching_string = convert_text_to_abstracted_string(
             text, annotations, literals
         )

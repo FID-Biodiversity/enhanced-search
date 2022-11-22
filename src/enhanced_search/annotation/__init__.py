@@ -123,7 +123,9 @@ class AnnotationResult:
     tokens: List[LiteralString] = field(default_factory=list)
     named_entity_recognition: List[Annotation] = field(default_factory=list)
     literals: List[LiteralString] = field(default_factory=list)
-    entity_linking: Dict[Annotation, List[Uri]] = field(default_factory=dict)
+    entity_linking: Dict[str, Dict[NamedEntityType, List[Uri]]] = field(
+        default_factory=dict
+    )
     disambiguated_annotations: Dict[Annotation, Annotation] = field(
         default_factory=dict
     )
