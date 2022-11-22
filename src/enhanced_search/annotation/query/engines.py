@@ -15,7 +15,7 @@ from enhanced_search.annotation import (
     Uri,
 )
 from enhanced_search.annotation.utils import prepare_value_for_sparql
-from enhanced_search.databases import KnowledgeDatabase
+from enhanced_search.databases.graph import KnowledgeDatabase
 
 
 @runtime_checkable
