@@ -1,5 +1,7 @@
+"""Database interfaces to talk to different Graph and Triple-Store Databases."""
+
 import json
-from typing import Protocol, Optional
+from typing import Optional, Protocol
 
 from SPARQLWrapper import SPARQLWrapper
 
@@ -65,6 +67,8 @@ class SparqlGraphDatabase:
             "'",
             '"',
             "#",
+            "<",
+            ">",
         ]  # backslash has to be the first escaped character!
 
         for char in characters_to_escape:

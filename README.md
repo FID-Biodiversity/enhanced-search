@@ -240,7 +240,6 @@ You see that the annotation's features hold the original URI of the annotation (
 To add configurations flexible, just modify the variables stored in the `enhanced_search.configuration`. Be aware, that you have to add your data there, before calling the functions of the framework. Otherwise, it is not guaranteed that your settings will apply!
 
 ### Database
-
 First, you need to specify the databases you will need. This applies to any database you want to use with the search framework. You have to specify the database in the variable `DATABASE` in the `configuration`! Let's say, you want to set a SPARQL and a Redis database for now. This would look like this:
 
 ```python
@@ -281,8 +280,13 @@ db = factory.create("key-value")
 # The variable "db" will now hold an object of the "RedisDatabase" class.
 ```
 
-### Semantic Engine
+#### Implemented Databases
+| Database Name | Class Import Path |
+| ------------- | ------------|
+|[Redis](https://redis.io/)| `enhanced_search.databases.key_value.RedisDatabase`|
+|Any SPARQL Database| `enhanced_search.databases.graph.SparqlGraphDatabase`|
 
+### Semantic Engine
 After you defined the database, you can also define the semantic engine in the variable `SEMANTIC_ENGINES` (if you want to use e.g. the `SemanticQueryProcessor`. Currently, there is only one semantic engine implemented that can translate a query to a SPARQL query and convert back the SPARQL response into a proper Python format.
 
 To set the semantic engine appropriately simply call:
@@ -320,7 +324,12 @@ When in the package root directory, simply call:
 pytest
 ```
 
-This should run the tests, test coverage, linters, and static testing tools.
+This should run the tests.
 
-## License
-![AGPL-3.0 License](https://www.gnu.org/graphics/agplv3-88x31.png)
+For version compatibility, you should have `pyenv` installed and run
+
+```shell
+tox
+```
+
+This tests the code in multiple Python version, runs coverage and some code security checks.
