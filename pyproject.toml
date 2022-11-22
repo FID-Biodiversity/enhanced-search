@@ -6,10 +6,13 @@ build-backend = "setuptools.build_meta"
 name = "enhanced-search"
 description = "A library to orchestrate the BIOfid semantic search"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = {text = "AGPLv3"}
 classifiers = [
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Development Status :: 3 - Alpha",
     "OSI Approved :: GNU Affero General Public License v3"
 ]
@@ -30,9 +33,7 @@ dev = [
     # Testing
     "tox",
     "pytest>=7.0",
-    "pytest-mypy",
     "pytest-cov",
-    "pytest-pylint",
 
     # Linters
     "pre-commit",
@@ -52,7 +53,6 @@ dev = [
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "--mypy --pylint -ra -q --cov --cov-report term-missing --cov-fail-under 95 ."
 testpaths = [
     "tests"
 ]
