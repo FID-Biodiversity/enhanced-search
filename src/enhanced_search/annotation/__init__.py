@@ -29,6 +29,13 @@ class NamedEntityType(Enum):
     MISCELLANEOUS = "Miscellaneous"
 
 
+class RelationshipType(Enum):
+    """A normalizing class for Relationships between Word objects."""
+
+    AND = "and"
+    OR = "or"
+
+
 @dataclass
 class Uri:
     """A representation of an URI."""
@@ -66,6 +73,12 @@ class Word:
 
     def __hash__(self):
         return hash((self.begin, self.end, self.text))
+
+    def __str__(self):
+        text = self.text
+        if self.is_quoted:
+            text = f'"{text}"'
+        return text
 
 
 @dataclass
@@ -110,9 +123,10 @@ class Statement:
     subject and object.
     """
 
-    subject: Optional[Set[Uri]] = None
+    subject: Optional[Union[Set[Uri], LiteralString]] = None
     predicate: Optional[Set[Uri]] = None
     object: Optional[Union[Set[Uri], LiteralString]] = None
+    relationship: Optional[RelationshipType] = None
 
 
 @dataclass

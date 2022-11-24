@@ -7,6 +7,7 @@ from enhanced_search.annotation import (
     AnnotationResult,
     LiteralString,
     NamedEntityType,
+    RelationshipType,
     Statement,
     Uri,
 )
@@ -189,6 +190,61 @@ class TestPatternDependencyAnnotationEngine:
                         "subject": "0/5",
                         "predicate": "17/23",
                         "object": "10/16",
+                    }
+                ],
+            ),
+            (  # Scenario - Literals with an OR-conjunction
+                "Gerste oder Malz",
+                AnnotationResult(
+                    literals=[
+                        LiteralString(begin=0, end=6, text="Gerste", is_safe=False),
+                        LiteralString(begin=7, end=11, text="oder", is_safe=False),
+                        LiteralString(begin=12, end=16, text="Malz", is_safe=False),
+                    ],
+                ),
+                [
+                    {
+                        "subject": "0/6",
+                        "object": "12/16",
+                        "relationship": RelationshipType.OR,
+                    }
+                ],
+            ),
+            (  # Scenario - Quoted literals with an OR-conjunction
+                "'Gerste oder Malz'",
+                AnnotationResult(
+                    literals=[
+                        LiteralString(begin=0, end=6, text="Gerste", is_safe=False),
+                        LiteralString(begin=7, end=11, text="oder", is_safe=False),
+                        LiteralString(begin=12, end=16, text="Malz", is_safe=False),
+                    ],
+                ),
+                [],
+            ),
+            (  # Scenario - Literal and taxon in OR-conjunction
+                "Fagus oder Gerste",
+                AnnotationResult(
+                    named_entity_recognition=[
+                        Annotation(
+                            begin=0,
+                            end=5,
+                            text="Fagus",
+                            named_entity_type=NamedEntityType.PLANT,
+                            uris={
+                                Uri("https://www.biofid.de/ontology/fagus_sylvatica")
+                            },
+                        )
+                    ],
+                    literals=[
+                        LiteralString(begin=6, end=10, text="oder", is_safe=False),
+                        LiteralString(begin=11, end=17, text="Gerste", is_safe=False),
+                    ],
+                ),
+                [
+                    {
+                        "subject": "0/5",
+                        "object": "11/17",
+                        "relationship": RelationshipType.OR,
                     }
                 ],
             ),

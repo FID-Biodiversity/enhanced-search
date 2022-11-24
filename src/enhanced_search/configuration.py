@@ -26,6 +26,11 @@ ANNOTATION_PRIORITY = [
     MISC_ANNOTATION_STRING,
 ]
 
+SUBJECT_STRING = "subject"
+PREDICATE_STRING = "predicate"
+OBJECT_STRING = "object"
+RELATIONSHIP_STRING = "relationship"
+
 # TextAnnotator
 TAXON_CONTEXT_KEYWORD = "taxon"
 LOCATION_CONTEXT_KEYWORD = "location"
@@ -36,21 +41,21 @@ PREDICATE_VALUE_CONTEXT_KEYWORD = "predicate_value"
 ENABLE_FALLBACK_DATABASE = True
 FALLBACK_DATABASE_CLASS = "enhanced_search.databases.key_value.SimpleKeyValueDatabase"
 FALLBACK_DATABASE_DATA = {
-        "pflanze": '{"Plant_Flora": [["https://www.biofid.de/ontology/pflanzen", 3]]}',
-        "quercus": '{"Plant_Flora": [["https://www.biofid.de/ontology/quercus", 3]]}',
-        "quercus sylvestris": '{"Plant_Flora": '
-        '[["https://www.biofid.de/ontology/quercus_sylvestris", 3]]}',
-        "fagus": '{"Plant_Flora": ' '[["https://www.biofid.de/ontology/fagus", 3]]}',
-        "fagus sylvatica": '{"Plant_Flora": '
-        '[["https://www.biofid.de/ontology/fagus_sylvatica", 3]]}',
-        "deutschland": '{"Location_Place": [['
-        '"https://sws.geonames.org/deutschland", 3]]}',
-        "paris": '{"Location_Place": [["https://sws.geonames.org/paris", 3]],'
-        '"Plant_Flora": [["https://www.biofid.de/ontology/paris"'
-        ", 3]]}",
-        "rot": '{"Miscellaneous": [["https://pato.org/red_color", 3]]}',
-        "blüte": '{"Miscellaneous": [["https://pato.org/flower_part", 2]]}',
-    }
+    "pflanze": '{"Plant_Flora": [["https://www.biofid.de/ontology/pflanzen", 3]]}',
+    "quercus": '{"Plant_Flora": [["https://www.biofid.de/ontology/quercus", 3]]}',
+    "quercus sylvestris": '{"Plant_Flora": '
+    '[["https://www.biofid.de/ontology/quercus_sylvestris", 3]]}',
+    "fagus": '{"Plant_Flora": ' '[["https://www.biofid.de/ontology/fagus", 3]]}',
+    "fagus sylvatica": '{"Plant_Flora": '
+    '[["https://www.biofid.de/ontology/fagus_sylvatica", 3]]}',
+    "deutschland": '{"Location_Place": [['
+    '"https://sws.geonames.org/deutschland", 3]]}',
+    "paris": '{"Location_Place": [["https://sws.geonames.org/paris", 3]],'
+    '"Plant_Flora": [["https://www.biofid.de/ontology/paris"'
+    ", 3]]}",
+    "rot": '{"Miscellaneous": [["https://pato.org/red_color", 3]]}',
+    "blüte": '{"Miscellaneous": [["https://pato.org/flower_part", 2]]}',
+}
 
 # See module factories.DatabaseFactory for an example of how databases are configured.
 DATABASES: dict = {}

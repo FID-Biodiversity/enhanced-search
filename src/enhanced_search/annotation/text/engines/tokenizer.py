@@ -1,6 +1,8 @@
+"""Provides AnnotationEngines for tokenizing a given text."""
+
 from typing import List
 
-from enhanced_search.annotation import AnnotationResult, Word
+from enhanced_search.annotation import AnnotationResult, LiteralString, Word
 from enhanced_search.annotation.text.utils import tokenize_text
 
 
@@ -17,7 +19,7 @@ class SimpleTokenizer:
         """Tokenizes the given text and adds it to the AnnotationResult."""
         tokens = tokenize_text(text, keep_quotations=True)
         tokens = self._filter_tokens(tokens)
-        words = tokens_to_word_objects(tokens, text)
+        words = tokens_to_literal_string_objects(tokens, text)
 
         annotation_result.tokens = words
 
@@ -38,20 +40,22 @@ def remove_punctuation_marks(token: str) -> str:
     return token.strip("!.?;,")
 
 
-def tokens_to_word_objects(tokens: List[str], text: str) -> List[Word]:
-    """Converts a list of strings to a Word list.
+def tokens_to_literal_string_objects(
+    tokens: List[str], text: str
+) -> List[LiteralString]:
+    """Converts a list of strings to a list of LiteralStrings.
     All tokens in the list have to exist in the given text!
     """
-    words = []
+    literals = []
     last_end = 0
     for token in tokens:
         token_start = text.index(token, last_end)
         last_end = token_start + len(token)
-        word = Word(begin=token_start, end=last_end, text=token)
-        word_quotation_check(word)
-        words.append(word)
+        literal = LiteralString(begin=token_start, end=last_end, text=token)
+        word_quotation_check(literal)
+        literals.append(literal)
 
-    return words
+    return literals
 
 
 def word_quotation_check(word: Word) -> None:

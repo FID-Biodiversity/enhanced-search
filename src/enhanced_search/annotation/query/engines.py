@@ -149,7 +149,7 @@ class SparqlQueryGenerator:
 
         subject_variable_name = "?subject"
 
-        if isinstance(statement.subject, Uri):
+        if isinstance(statement.subject, (Uri, LiteralString)):
             subject_variable_name = prepare_value_for_sparql(statement.subject)
         else:
             subjects = " ".join(

@@ -8,6 +8,7 @@ from enhanced_search.annotation import (
     LiteralString,
     NamedEntityType,
     Query,
+    RelationshipType,
     Statement,
     Uri,
 )
@@ -595,6 +596,18 @@ class TestSemanticQueryProcessor:
                     )
                 ],
             ),
+            (  # Scenario - OR-conjunction
+                Query("Pflanzen oder Hafen"),
+                [
+                    Statement(
+                        subject={Uri("https://www.biofid.de/ontology/pflanzen")},
+                        object=LiteralString(
+                            begin=14, end=19, text="Hafen", is_safe=False
+                        ),
+                        relationship=RelationshipType.OR,
+                    )
+                ],
+            ),
         ],
     )
     def test_update_query_with_statements(
@@ -603,6 +616,7 @@ class TestSemanticQueryProcessor:
         expected_statements: List[Statement],
         query_processor: SemanticQueryProcessor,
     ):
+        """Feature: The statements of the annotations are correctly deduced."""
         query_processor.update_query_with_annotations(query)
         assert query.statements == expected_statements
 

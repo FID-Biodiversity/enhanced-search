@@ -1,5 +1,8 @@
-from typing import Optional, Set, Union, List
+"""Provides processors that can enrich Query objects semantically."""
 
+from typing import Any, Dict, List, Optional, Set, Union
+
+from enhanced_search import configuration as config
 from enhanced_search.annotation import (
     Annotation,
     Feature,
@@ -36,8 +39,8 @@ class SemanticQueryProcessor:
 
     def __init__(
         self,
-        semantic_engine_name: str = None,
-        text_annotator: TextAnnotator = None,
+        semantic_engine_name: Optional[str] = None,
+        text_annotator: Optional[TextAnnotator] = None,
     ):
         self.text_annotator = text_annotator
         self.semantic_engine_name = semantic_engine_name
@@ -46,12 +49,18 @@ class SemanticQueryProcessor:
         """Adds further semantic data to the given query.
         The query object is updated in-place!
         """
+        if self.text_annotator is None:
+            raise ValueError("The TextAnnotator is not set! Operation not possible!")
+
         annotation_result = self.text_annotator.annotate(query.original_string)
 
         query.annotations = annotation_result.named_entity_recognition
+        query.literals = annotation_result.literals
+
         query.statements = create_statements_from_dependencies(
             dependencies=annotation_result.annotation_relationships,
             annotations=query.annotations,
+            literals=query.literals,
         )
 
     def resolve_query_annotations(self, query: Query) -> None:
@@ -62,6 +71,9 @@ class SemanticQueryProcessor:
         the criteria, the received URIs are updating the Annotations uris. The original
         URI(s) for this annotation
         """
+        if self.semantic_engine_name is None:
+            raise ValueError("The Semantic Engine is not set! Operation not possible!")
+
         engine_factory = SemanticEngineFactory()
         semantic_engine = engine_factory.create(self.semantic_engine_name)
         additional_annotation_data = semantic_engine.generate_query_semantics(query)
@@ -95,9 +107,12 @@ def update_annotation_features(query: Query) -> None:
     }
 
     for statement in query.statements:
-        annotation = annotation_by_uri_index.get(freeze_key(statement.subject))
-        create_features_from_statements(annotation, statement)
-        annotation.uris = set()
+        if statement.subject is not None:
+            annotation = annotation_by_uri_index.get(freeze_key(statement.subject))
+
+            if annotation is not None:
+                create_features_from_statements(annotation, statement)
+                annotation.uris = set()
 
 
 def create_features_from_statements(
@@ -116,7 +131,7 @@ def create_features_from_statements(
 
     if feature is None:
         feature = create_feature_from_uris(statement.predicate)
-        if statement_object is not None:
+        if statement_object is not None and feature is not None:
             feature.value = statement_object
     else:
         feature.property = statement.predicate
@@ -126,19 +141,36 @@ def create_features_from_statements(
 
 
 def create_statements_from_dependencies(
-    dependencies: List[dict], annotations: List[Annotation]
+    dependencies: List[Dict[str, Any]],
+    annotations: List[Annotation],
+    literals: List[LiteralString],
 ) -> List[Statement]:
     """Compiles the output of the dependency parser to
     generate a list of Statements.
     """
     annotation_by_id_index = {annotation.id: annotation for annotation in annotations}
+    literal_by_id_index = {literal.id: literal for literal in literals}
 
     statements = []
     for dependency in dependencies:
-        statement_parameters = {
+        statement_parameters: Dict[str, Any] = {
             name: annotation_by_id_index[annotation_id].uris
             for name, annotation_id in dependency.items()
+            if annotation_id in annotation_by_id_index
         }
+
+        statement_parameters.update(
+            {
+                name: literal_by_id_index[literal_id]
+                for name, literal_id in dependency.items()
+                if literal_id in literal_by_id_index
+            }
+        )
+
+        relationship_type = dependency.get(config.RELATIONSHIP_STRING)
+        if relationship_type is not None:
+            statement_parameters[config.RELATIONSHIP_STRING] = relationship_type
+
         statement = Statement(**statement_parameters)
         statements.append(statement)
 
@@ -184,13 +216,15 @@ def purge_ambiguous_annotations(annotation: Annotation) -> None:
     annotation.ambiguous_annotations = set()
 
 
-def create_feature_from_uris(uris: Set[Uri]) -> Optional[Feature]:
+def create_feature_from_uris(
+    uris: Optional[Union[Set[Uri], LiteralString]]
+) -> Optional[Feature]:
     """Creates a Feature object from the given URIs."""
-    if not uris or isinstance(uris, LiteralString):
+    if not uris or isinstance(uris, LiteralString) or uris is None:
         return None
 
     feature = Feature()
-    elem = next(uris.__iter__())
+    elem = next(uris.__iter__())  # pylint: disable=C2801
     if elem.position_in_triple == 2:
         feature.property = uris
     else:
@@ -199,9 +233,9 @@ def create_feature_from_uris(uris: Set[Uri]) -> Optional[Feature]:
     return feature
 
 
-def freeze_key(set_to_freeze: Union[Set[Uri], Uri]) -> tuple:
+def freeze_key(set_to_freeze: Union[Set[Uri], Uri, LiteralString]) -> tuple:
     """Returns a tuple of either a sorted set or containing a single Uri."""
-    if isinstance(set_to_freeze, Uri):
-        return (Uri,)
-    else:
-        return tuple(sorted(set_to_freeze, key=lambda a: a.url))
+    if isinstance(set_to_freeze, (Uri, LiteralString)):
+        return (set_to_freeze,)
+
+    return tuple(sorted(set_to_freeze, key=lambda a: a.url))

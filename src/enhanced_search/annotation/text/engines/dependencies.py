@@ -6,7 +6,12 @@ from re import Match as RegexMatch
 from re import Pattern as RegexPattern
 from typing import List, Optional
 
-from enhanced_search.annotation import Annotation, AnnotationResult, LiteralString
+from enhanced_search.annotation import (
+    Annotation,
+    AnnotationResult,
+    LiteralString,
+    RelationshipType,
+)
 from enhanced_search.annotation.utils import convert_text_to_abstracted_string
 
 
@@ -27,6 +32,7 @@ class Pattern(ABC):
     """
 
     regex_pattern: Optional[RegexPattern] = None
+    additional_data: dict = {}
 
     def match(
         self, text: str, annotations: List[Annotation], literals: List[LiteralString]
@@ -45,7 +51,9 @@ class Pattern(ABC):
         )
         matches = self.regex_pattern.search(abstracted_matching_string)
 
-        return compile_result(matches)
+        additional_data = self.additional_data
+
+        return compile_result(matches, **additional_data)
 
 
 class OnlyTaxonPattern(Pattern):
@@ -102,6 +110,24 @@ class TaxonNumericalPropertyPattern(Pattern):
     )
 
 
+class AndConjunctionPattern(Pattern):
+    """Recognizes AND-conjuncted terms."""
+
+    regex_pattern = re.compile(
+        r"\S+<(?P<subject>.+?)>}? (?:und<.+?>|and<.+?>) \S+<(?P<object>.+?)>"
+    )
+    additional_data = {"relationship": RelationshipType.AND}
+
+
+class OrConjunctionPattern(Pattern):
+    """Recognize OR-conjuncted terms."""
+
+    regex_pattern = re.compile(
+        r"\S+<(?P<subject>.+?)>}? (?:oder<.+?>|or<.+?>) \S+<(?P<object>.+?)>"
+    )
+    additional_data = {"relationship": RelationshipType.OR}
+
+
 class PatternDependencyAnnotationEngine:
     """Inferences semantic relationships between Annotations and returns them
     as Statement.
@@ -115,6 +141,8 @@ class PatternDependencyAnnotationEngine:
     patterns = [
         TaxonPropertyPattern(),
         TaxonNumericalPropertyPattern(),
+        AndConjunctionPattern(),
+        OrConjunctionPattern(),
     ]
 
     def parse(self, text: str, annotation_result: AnnotationResult) -> None:
@@ -139,7 +167,7 @@ class PatternDependencyAnnotationEngine:
         annotation_result.annotation_relationships = statements
 
 
-def compile_result(matches: Optional[RegexMatch]) -> List[dict]:
+def compile_result(matches: Optional[RegexMatch], **kwargs) -> List[dict]:
     """Uses the group names of the matches to generate a dict with all URI data.
     The group names are used as keys. The value of the group is that of
     an Annotation ID.
@@ -151,6 +179,9 @@ def compile_result(matches: Optional[RegexMatch]) -> List[dict]:
     statement = {}
     for name, word_id in matches.groupdict().items():
         statement[name] = word_id
+
+    for name, value in kwargs.items():
+        statement[name] = value
 
     context.append(statement)
 
