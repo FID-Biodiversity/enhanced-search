@@ -56,13 +56,20 @@ def set_database_configuration(default_n_triples_source_path):
         "key-value": {
             "class": "tests.dummies.DummyKeyValueDatabase",
         },
+        "failing-db": {
+            "class": "tests.dummies.FailingDatabase",
+        },
     }
 
     config.SEMANTIC_ENGINES = {
         "sparql": {
             "class": "enhanced_search.annotation.query.engines.SparqlSemanticEngine",
             "database": "sparql",
-        }
+        },
+        "failing-sparql-engine": {
+            "class": "enhanced_search.annotation.query.engines.SparqlSemanticEngine",
+            "database": "failing-db",
+        },
     }
 
 
@@ -100,16 +107,19 @@ def loaded_key_value_database():
 # ANNOTATOR ENGINES #
 @pytest.fixture(scope="session")
 def simple_tokenizer():
+    """Returns an instance of the SimpleTokenizer."""
     return SimpleTokenizer()
 
 
 @pytest.fixture(scope="session")
 def simple_lemmatizer():
+    """Returns an instance of the SimpleLemmatizer."""
     return SimpleLemmatizer()
 
 
 @pytest.fixture(scope="session")
 def simple_language_detector():
+    """Returns an instance of the SimpleLanguageDetector."""
     return SimpleLanguageDetector()
 
 

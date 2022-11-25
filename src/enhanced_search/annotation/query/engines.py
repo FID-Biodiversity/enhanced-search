@@ -29,6 +29,9 @@ class SemanticEngine(Protocol):
 class SparqlSemanticEngine:
     """Uses a SPARQL database to retrieve additional data on a query.
 
+    ToDo:
+        Add query sanitization!
+
     Obeys the SemanticEngine interface.
     """
 
@@ -39,11 +42,14 @@ class SparqlSemanticEngine:
     def generate_query_semantics(self, query: Query) -> dict:
         """Takes a Query and returns additional data on its Annotations."""
         taxon_variable_name = "taxon"
-        sparql_query = self._sparql_generator.generate(
-            f"?{taxon_variable_name}", query.statements
-        )
+        db_response_string = None
 
-        db_response_string = self._database.read(sparql_query)
+        if query.statements:
+            sparql_query = self._sparql_generator.generate(
+                f"?{taxon_variable_name}", query.statements
+            )
+
+            db_response_string = self._database.read(sparql_query, is_safe=True)
 
         if db_response_string is not None:
             data = self._extract_data_from_response(db_response_string)

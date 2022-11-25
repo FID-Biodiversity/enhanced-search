@@ -12,12 +12,18 @@ class KnowledgeDatabase(Protocol):
     Obeys the Database interface.
     """
 
-    def read(self, query: str, *args, **kwargs) -> Optional[str]:
+    def read(self, query: str, is_safe: bool = False, **kwargs) -> Optional[str]:
         """Queries a database with the given query string and
         parameters and returns the retrieved data as string.
 
-        This function may return None, if no corresponding data
-        could be retrieved.
+        Args:
+            query: A valid query string.
+            is_safe: A boolean to confirm that the given query string is sanitized
+                     appropriately. Default: False
+
+        Returns:
+            A string representation of the database response. This function may
+            return None, if no corresponding data could be retrieved.
         """
 
     def sanitize_query(self, text: str) -> str:

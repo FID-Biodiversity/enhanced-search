@@ -45,9 +45,11 @@ FALLBACK_DATABASE_DATA = {
     "quercus": '{"Plant_Flora": [["https://www.biofid.de/ontology/quercus", 3]]}',
     "quercus sylvestris": '{"Plant_Flora": '
     '[["https://www.biofid.de/ontology/quercus_sylvestris", 3]]}',
-    "fagus": '{"Plant_Flora": ' '[["https://www.biofid.de/ontology/fagus", 3]]}',
+    "fagus": '{"Plant_Flora": [["https://www.biofid.de/ontology/fagus", 3]]}',
     "fagus sylvatica": '{"Plant_Flora": '
     '[["https://www.biofid.de/ontology/fagus_sylvatica", 3]]}',
+    "fagus sylvatica f. pendula (lodd.) dippel": '{"Plant_Flora": [['
+    '"https://www.biofid.de/ontology/fagus_sylvatica_pendula", 3]]}',
     "deutschland": '{"Location_Place": [['
     '"https://sws.geonames.org/deutschland", 3]]}',
     "paris": '{"Location_Place": [["https://sws.geonames.org/paris", 3]],'

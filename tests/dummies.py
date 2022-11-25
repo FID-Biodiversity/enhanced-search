@@ -15,7 +15,7 @@ class DummySparqlKnowledgeDatabase:
         if rdf_source_path is not None:
             self.db.parse(rdf_source_path)
 
-    def read(self, query: str) -> str:
+    def read(self, query: str, _: bool = False) -> str:
         """Queries a database with the given query string and
         parameters and returns the retrieved data as string.
         """
@@ -26,7 +26,7 @@ class DummySparqlKnowledgeDatabase:
         if serialized_data is not None:
             return serialized_data.decode("utf-8")
 
-        raise TypeError('No data found for the given query!')
+        raise TypeError("No data found for the given query!")
 
     def parse(self, rdf_source_path: Union[pathlib.Path, str]) -> None:
         """Load the RDF data from a given path."""
@@ -47,7 +47,7 @@ class DummyKeyValueDatabase:
     def __init__(self):
         self.data = {}
 
-    def read(self, query: str) -> str:
+    def read(self, query: str, _: bool = False) -> str:
         """Get data for a query string."""
         self._raise_if_not_valid(query)
         return self.data.get(query)
@@ -62,3 +62,15 @@ class DummyKeyValueDatabase:
                 f"Reading short or numerical-only values is forbidden "
                 f"for performance reasons! Provided was string: '{query}'"
             )
+
+
+class FailingDatabase:
+    """Will raise a Value Error as soon as the `read` method is called."""
+
+    def read(self, query: str, is_safe: bool = False) -> str:
+        """Raises on call! Only for testing purposes!"""
+        raise ValueError("Database read() was called!")
+
+    def sanitize_query(self, text: str) -> str:
+        """This method does nothing, only returns the given text."""
+        return text

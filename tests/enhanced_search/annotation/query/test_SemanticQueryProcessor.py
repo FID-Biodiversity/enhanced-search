@@ -573,6 +573,20 @@ class TestSemanticQueryProcessor:
         query_processor.update_query_with_annotations(query)
         assert query.statements == expected_statements
 
+    def test_no_database_query_with_no_data(self, text_annotator):
+        """Feature: The SemanticEngine does not not call the database when there
+        are no Statements.
+        """
+
+        # The database of this SemanticEngine will raise as soon as it is called.
+        query_processor = SemanticQueryProcessor(
+            semantic_engine_name="failing-sparql-engine", text_annotator=text_annotator
+        )
+        query = Query("Foo")
+
+        query_processor.resolve_query_annotations(query)
+        assert query.statements == []
+
     @pytest.fixture
     def query_processor(self, text_annotator: TextAnnotator):
         return SemanticQueryProcessor(

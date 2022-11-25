@@ -4,9 +4,9 @@ import pytest
 
 from enhanced_search.annotation import (
     Annotation,
-    NamedEntityType,
     AnnotationResult,
-    Word,
+    LiteralString,
+    NamedEntityType,
 )
 from enhanced_search.annotation.text.engines import (
     StringBasedNamedEntityAnnotatorEngine,
@@ -18,7 +18,7 @@ class TestStringBasedNamedEntityAnnotatorEngine:
         ["tokens", "expected_annotations"],
         [
             (  # Scenario - Only a genus is given
-                [Word(begin=0, end=7, text="Quercus", lemma="Quercus")],
+                [LiteralString(begin=0, end=7, text="Quercus", lemma="Quercus")],
                 [
                     Annotation(
                         begin=0,
@@ -31,8 +31,10 @@ class TestStringBasedNamedEntityAnnotatorEngine:
             ),
             (  # Scenario - Full species name is provided
                 [
-                    Word(begin=0, end=7, text="Quercus", lemma="Quercus"),
-                    Word(begin=8, end=18, text="sylvestris", lemma="sylvestris"),
+                    LiteralString(begin=0, end=7, text="Quercus", lemma="Quercus"),
+                    LiteralString(
+                        begin=8, end=18, text="sylvestris", lemma="sylvestris"
+                    ),
                 ],
                 [
                     Annotation(
@@ -46,10 +48,12 @@ class TestStringBasedNamedEntityAnnotatorEngine:
             ),
             (  # Scenario - AND-conjuncted species with a genus
                 [
-                    Word(begin=0, end=7, text="Quercus", lemma="Quercus"),
-                    Word(begin=8, end=18, text="sylvestris", lemma="sylvestris"),
-                    Word(begin=19, end=22, text="und", lemma="und"),
-                    Word(begin=23, end=28, text="Fagus", lemma="Fagus"),
+                    LiteralString(begin=0, end=7, text="Quercus", lemma="Quercus"),
+                    LiteralString(
+                        begin=8, end=18, text="sylvestris", lemma="sylvestris"
+                    ),
+                    LiteralString(begin=19, end=22, text="und", lemma="und"),
+                    LiteralString(begin=23, end=28, text="Fagus", lemma="Fagus"),
                 ],
                 [
                     Annotation(
@@ -70,9 +74,11 @@ class TestStringBasedNamedEntityAnnotatorEngine:
             ),
             (  # Scenario - A single genus with a location with an "in"
                 [
-                    Word(begin=0, end=5, text="Fagus", lemma="Fagus"),
-                    Word(begin=6, end=8, text="in", lemma="in"),
-                    Word(begin=9, end=20, text="Deutschland", lemma="Deutschland"),
+                    LiteralString(begin=0, end=5, text="Fagus", lemma="Fagus"),
+                    LiteralString(begin=6, end=8, text="in", lemma="in"),
+                    LiteralString(
+                        begin=9, end=20, text="Deutschland", lemma="Deutschland"
+                    ),
                 ],
                 [
                     Annotation(
@@ -93,8 +99,10 @@ class TestStringBasedNamedEntityAnnotatorEngine:
             ),
             (  # Scenario - Single genus with location with no "in"
                 [
-                    Word(begin=0, end=5, text="Fagus", lemma="Fagus"),
-                    Word(begin=6, end=17, text="Deutschland", lemma="Deutschland"),
+                    LiteralString(begin=0, end=5, text="Fagus", lemma="Fagus"),
+                    LiteralString(
+                        begin=6, end=17, text="Deutschland", lemma="Deutschland"
+                    ),
                 ],
                 [
                     Annotation(
@@ -115,9 +123,11 @@ class TestStringBasedNamedEntityAnnotatorEngine:
             ),
             (  # Scenario - Species with location with no "in"
                 [
-                    Word(begin=0, end=5, text="Fagus", lemma="Fagus"),
-                    Word(begin=6, end=15, text="sylvatica", lemma="sylvatica"),
-                    Word(begin=16, end=27, text="Deutschland", lemma="Deutschland"),
+                    LiteralString(begin=0, end=5, text="Fagus", lemma="Fagus"),
+                    LiteralString(begin=6, end=15, text="sylvatica", lemma="sylvatica"),
+                    LiteralString(
+                        begin=16, end=27, text="Deutschland", lemma="Deutschland"
+                    ),
                 ],
                 [
                     Annotation(
@@ -138,7 +148,7 @@ class TestStringBasedNamedEntityAnnotatorEngine:
             ),
             (  # Scenario - A species name in quotes
                 [
-                    Word(
+                    LiteralString(
                         begin=0,
                         end=15,
                         text="Fagus sylvatica",
@@ -158,7 +168,7 @@ class TestStringBasedNamedEntityAnnotatorEngine:
             ),
             (  # Scenario - A genus name within a longer quoted string
                 [
-                    Word(
+                    LiteralString(
                         begin=0,
                         end=5,
                         text="A quoted Fagus journal",
@@ -170,9 +180,9 @@ class TestStringBasedNamedEntityAnnotatorEngine:
             ),
             (  # Scenario - An ambiguous term
                 [
-                    Word(begin=0, end=4, text="What", lemma="What"),
-                    Word(begin=5, end=10, text="about", lemma="about"),
-                    Word(begin=11, end=16, text="Paris", lemma="Paris"),
+                    LiteralString(begin=0, end=4, text="What", lemma="What"),
+                    LiteralString(begin=5, end=10, text="about", lemma="about"),
+                    LiteralString(begin=11, end=16, text="Paris", lemma="Paris"),
                 ],
                 [
                     Annotation(
@@ -193,12 +203,31 @@ class TestStringBasedNamedEntityAnnotatorEngine:
                     ),
                 ],
             ),
+            (  # Scenario - A species with many tokens and a potential ambiguity
+                [
+                    LiteralString(begin=0, end=5, text="Fagus", lemma="Fagus"),
+                    LiteralString(begin=6, end=15, text="sylvatica", lemma="sylvatica"),
+                    LiteralString(begin=16, end=18, text="f.", lemma="f."),
+                    LiteralString(begin=19, end=26, text="pendula", lemma="pendula"),
+                    LiteralString(begin=27, end=34, text="(Lodd.)", lemma="(Lodd.)"),
+                    LiteralString(begin=35, end=41, text="Dippel", lemma="Dippel"),
+                ],
+                [
+                    Annotation(
+                        begin=0,
+                        end=41,
+                        text="Fagus sylvatica f. pendula (Lodd.) Dippel",
+                        lemma="Fagus sylvatica f. pendula (Lodd.) Dippel",
+                        named_entity_type=NamedEntityType.PLANT,
+                    )
+                ],
+            ),
         ],
     )
     def test_parse(
         self,
         string_based_ne_annotator_engine: StringBasedNamedEntityAnnotatorEngine,
-        tokens: List[Word],
+        tokens: List[LiteralString],
         expected_annotations: List[Annotation],
     ):
         """Feature: Basic annotation with the KeywordAnnotationEngine."""

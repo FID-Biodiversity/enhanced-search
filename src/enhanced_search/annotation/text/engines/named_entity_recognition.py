@@ -46,8 +46,6 @@ class StringBasedNamedEntityAnnotatorEngine:
                         annotation_data.append(
                             (following_token, inferenced_text, extended_word_data)
                         )
-                    else:
-                        break
 
             if annotation_data:
                 relevant_data = annotation_data[-1]
@@ -94,8 +92,20 @@ class StringBasedNamedEntityAnnotatorEngine:
         return annotation
 
     def _is_word_valid(self, word: str) -> bool:
-        """Disapproves very short words (< 2 characters) and numerical strings,
-        as well as words in the STRING_BLACKLIST."""
+        """Evaluates a word's validity by multiple criteria.
+
+        None of the following may apply to the word:
+            * Very short (< 2 characters)
+            * is Numeric
+            * First character is "("
+            * is contained in STRING_BLACKLIST
+
+        Returns:
+            True, if none of the above given criteria applies. False, otherwise.
+        """
         return (
-            not word.isnumeric() and len(word) > 2 and word not in self.STRING_BLACKLIST
+            not word.isnumeric()
+            and len(word) > 2
+            and not word.startswith("(")
+            and word not in self.STRING_BLACKLIST
         )
