@@ -5,8 +5,6 @@
 
 This package provides the annotation and search tools used in the [BIOfid portal](https://www.biofid.de). It is not a search by itself but, as the names says, provides the framework for query annotation as well as database configuration and usage.
 
-Currently, the package provides only the query annotation module. This will be extended in the future.
-
 This package is under ongoing development. It is very likely that functions will be deprecated, return formats or parameter may change, or classes change their module.
 
 ## Installation
@@ -235,6 +233,47 @@ print(query.annotations[0].features)
 ```
 
 You see that the annotation's features hold the original URI of the annotation (´https://www.biofid.de/ontology/pflanzen´) and as another feature the criteria that it has red flowers in the form of `property` (which is the predicate, in this the flower) and `value` (which is the object, in this case the color red).
+
+## Solr Query Generation
+After the Query object has been enriched with the necessary data, we can move on to generate a Solr Query string from all this data.
+
+To do so, we simply call:
+
+```python
+from enhanced_search.generators import SolrQueryGenerator
+from enhanced_search.annotation import RelationshipType
+
+solr_query_generator = SolrQueryGenerator()
+
+# If you like, you can modify both the used search field and the type of conjunction applied in the query between non-related words.
+solr_query_generator.default_search_field = "my-search-field"
+solr_query_generator.default_conjunction_type = RelationshipType.AND
+solr_query = solr_query_generator.to_solr_query(query)
+
+print(solr_query.string)
+# Output: my-search-field:("https://www.biofid.de/ontology/plant_with_red_flower_1" 
+# OR "https://www.biofid.de/ontology/plant_with_red_flower_2" 
+# OR "https://www.biofid.de/ontology/plant_with_red_flower_3" 
+# OR "https://www.biofid.de/ontology/plant_with_red_flower_and_3_petals")
+# AND my-search-field:mit
+```
+
+URIs referencing the same entity are OR-conjuncted. In most use cases this makes sense. The conjunction to other words is set by the `default_conjunction_type` (which defaults to an AND-conjunction).
+
+You also see that the stopword "mit" (engl. "with") is also added the query. There are two ways to get rid of this. Either your Solr engine has a stop word list and hence will ignore it (disregarding if there is an AND-conjunction or not). The other way is to filter the `query.literals` variable for stop words before generating the query.
+
+```python
+stopwords = {"Ich", "der", "die", "das", "mit"} 
+query.literals = [literal for literal in query.literals if literal.text not in stopwords]
+
+solr_query = solr_query_generator.to_solr_query(query)
+
+print(solr_query.string)
+# Output: my-search-field:("https://www.biofid.de/ontology/plant_with_red_flower_1" 
+# OR "https://www.biofid.de/ontology/plant_with_red_flower_2" 
+# OR "https://www.biofid.de/ontology/plant_with_red_flower_3" 
+# OR "https://www.biofid.de/ontology/plant_with_red_flower_and_3_petals")
+```
 
 ## Configuration
 To add configurations flexible, just modify the variables stored in the `enhanced_search.configuration`. Be aware, that you have to add your data there, before calling the functions of the framework. Otherwise, it is not guaranteed that your settings will apply!
