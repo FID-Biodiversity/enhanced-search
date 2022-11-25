@@ -529,59 +529,12 @@ class TestSemanticQueryProcessor:
             (  # Scenario - No statements
                 Query(
                     "Fagus sylvatica",
-                    annotations=[
-                        Annotation(
-                            begin=0,
-                            end=15,
-                            text="Fagus",
-                            named_entity_type=NamedEntityType.PLANT,
-                            uris={
-                                Uri("https://www.biofid.de/ontology/fagus_sylvatica")
-                            },
-                        )
-                    ],
                 ),
                 [],
             ),
             (  # Scenario - Single statement
                 Query(
                     "Pflanzen mit roten Blüten",
-                    annotations=[
-                        Annotation(
-                            begin=0,
-                            end=8,
-                            text="Pflanzen",
-                            named_entity_type=NamedEntityType.PLANT,
-                            uris={Uri("https://www.biofid.de/ontology/pflanzen")},
-                        ),
-                        Annotation(
-                            begin=13,
-                            end=18,
-                            text="roten",
-                            named_entity_type=NamedEntityType.MISCELLANEOUS,
-                            uris={
-                                Uri(
-                                    url="https://pato.org/red_color",
-                                    position_in_triple=3,
-                                )
-                            },
-                        ),
-                        Annotation(
-                            begin=19,
-                            end=25,
-                            text="Blüten",
-                            named_entity_type=NamedEntityType.MISCELLANEOUS,
-                            uris={
-                                Uri(
-                                    url="https://pato.org/flower_part",
-                                    position_in_triple=2,
-                                )
-                            },
-                        ),
-                    ],
-                    literals=[
-                        LiteralString(begin=9, end=12, text="mit", is_safe=False)
-                    ],
                 ),
                 [
                     Statement(
