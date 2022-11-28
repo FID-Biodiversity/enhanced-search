@@ -15,10 +15,11 @@ class DummySparqlKnowledgeDatabase:
         if rdf_source_path is not None:
             self.db.parse(rdf_source_path)
 
-    def read(self, query: str, _: bool = False) -> str:
+    def read(self, query: str, is_safe: bool = False) -> str:
         """Queries a database with the given query string and
         parameters and returns the retrieved data as string.
         """
+        _ = is_safe
         result = self.db.query(query)
 
         serialized_data = result.serialize(format="json")
@@ -47,8 +48,9 @@ class DummyKeyValueDatabase:
     def __init__(self):
         self.data = {}
 
-    def read(self, query: str, _: bool = False) -> str:
+    def read(self, query: str, is_safe: bool = False) -> str:
         """Get data for a query string."""
+        _ = is_safe
         self._raise_if_not_valid(query)
         return self.data.get(query)
 

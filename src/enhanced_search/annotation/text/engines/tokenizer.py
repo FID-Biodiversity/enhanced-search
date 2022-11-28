@@ -36,8 +36,10 @@ class SimpleTokenizer:
 
 
 def remove_punctuation_marks(token: str) -> str:
-    """Removes commas, exclamation marks etc. at the beginning or end of a token."""
-    return token.strip("!.?;,")
+    """Removes question marks, exclamation marks etc. at the beginning
+    or end of a token.
+    """
+    return token.strip("!?;")
 
 
 def tokens_to_literal_string_objects(

@@ -9,6 +9,10 @@ class TestSimpleTokenizer:
         [
             ("Das ist ein Test!", ["Das", "ist", "ein", "Test"]),
             ("Ich suche 'Fagus sylvatica'", ["Ich", "suche", "Fagus sylvatica"]),
+            (
+                "Fagus sylvatica f. pendula (Lodd.) Dippel",
+                ["Fagus", "sylvatica", "f.", "pendula", "(Lodd.)", "Dippel"],
+            ),
         ],
     )
     def test_parse(self, text, expected_tokens, tokenizer, annotation_result):

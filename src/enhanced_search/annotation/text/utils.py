@@ -3,7 +3,7 @@
 import json
 import shlex
 from copy import deepcopy
-from typing import Generator, List, Set, Tuple
+from typing import Generator, List, Optional, Set, Tuple
 
 from enhanced_search import configuration as config
 from enhanced_search.annotation import Annotation, NamedEntityType, Word
@@ -61,8 +61,17 @@ def sort_named_entities_by_priority(named_entity_type_string: str) -> int:
     )
 
 
-def tokenize_text(text: str, keep_quotations: bool = False) -> List[str]:
-    """Splits a given text by whitespaces, but preserves quoted strings."""
+def tokenize_text(text: Optional[str], keep_quotations: bool = False) -> List[str]:
+    """Splits a given text by whitespaces, but preserves quoted strings.
+
+    Notes:
+        If parameter `text` is None, an empty list is returned. This is due to the fact,
+        that shlex.split reads from stdin, if it receives None as input.
+        (Source: https://docs.python.org/3.8/library/shlex.html#shlex.split)
+    """
+    if text is None:
+        return []
+
     return shlex.split(text, posix=not keep_quotations)
 
 
