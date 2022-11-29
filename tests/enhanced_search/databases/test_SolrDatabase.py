@@ -40,7 +40,7 @@ class TestSolrDatabase:
 
     @pytest.fixture
     def solr_db(self):
-        return SolrDatabase(url="http://localhost:8983/solr/digitaleSammlungen")
+        return SolrDatabase(url="http://localhost:8983/solr/my-core")
 
     @pytest.fixture(scope="session")
     def solr_response_toml_file_path(self, resource_directory):
