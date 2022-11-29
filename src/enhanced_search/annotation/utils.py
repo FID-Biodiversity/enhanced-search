@@ -3,6 +3,7 @@
 from typing import List, Union
 
 from enhanced_search.annotation import Annotation, LiteralString, Uri
+from enhanced_search.utils import escape_characters
 
 
 def convert_text_to_abstracted_string(
@@ -73,19 +74,30 @@ def replace_substring_between_positions(
 def prepare_value_for_sparql(value: Union[str, Uri, LiteralString]) -> str:
     """Prepares a given dataclass for insertion into a SPARQL query string.
     Adds "<" and ">" to an URI at start and end, respectively.
-    If the uri already has brackets, the original string is returned. If the given
+    If the URI already has brackets, the original string is returned. If the given
     string is not an URI (indicated by starting with "http"), the original string is
     returned too.
-    If given a Uri object, it will be converted to its string representation without
-    further escaping!
-    If given a LiteralString, the unescaped text will be returned. If the text is a
+    If given a LiteralString, the text will be returned. If the text is a
     string, it will be quoted. If it is an integer, it will be annotated
     appropriately.
+    The method acknowledges the `is_safe` flag. If this flag is True, the string
+    will not be escaped. Otherwise, the string is escaped appropriate for a
+    sane SPARQL query.
     """
-    if isinstance(value, Uri):
-        value = value.url
-    if isinstance(value, LiteralString):
-        original_text = value.text
+    if isinstance(value, str):
+        value = escape_sparql_input_string(value)
+
+    elif isinstance(value, Uri):
+        if not value.is_safe:
+            value = escape_sparql_input_string(value.url)
+        else:
+            value = value.url
+    elif isinstance(value, LiteralString):
+        if not value.is_safe:
+            original_text = escape_sparql_input_string(value.text)
+        else:
+            original_text = value.text
+
         text = f'"{original_text}"'
         if original_text.isnumeric():
             text = f"{text}^^<http://www.w3.org/2001/XMLSchema#integer>"
@@ -97,3 +109,18 @@ def prepare_value_for_sparql(value: Union[str, Uri, LiteralString]) -> str:
     if not value.startswith("<"):
         return f"<{value}>"
     return value
+
+
+def escape_sparql_input_string(text: str) -> str:
+    """Escapes any potential malicious character in a text.
+
+    Characters malicious for SPARQL databases:
+        * Single quotation
+        * Double quotation
+        * Hashtags (currently left out)
+        * Greater than sign (">")
+        * Less than sign ("<")
+    """
+
+    characters = ("'", '"', "<", ">")
+    return escape_characters(text, characters)

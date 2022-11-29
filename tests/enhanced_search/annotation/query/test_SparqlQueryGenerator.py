@@ -3,7 +3,7 @@ from typing import List
 
 import pytest
 
-from enhanced_search.annotation import Uri, LiteralString, Statement
+from enhanced_search.annotation import LiteralString, Statement, Uri
 from enhanced_search.annotation.query.engines import SparqlQueryGenerator
 
 
@@ -80,6 +80,22 @@ class TestSparqlQueryGenerator:
             extract_data_from_graph_response(variable_name, db_response_string)
             == expected_data
         )
+
+    def test_character_escaping(self, sparql_generator):
+        """Feature: Potential malicious characters are escaped."""
+        sparql_query_string = sparql_generator.generate(
+            variable_name="?taxon",
+            statements=[
+                Statement(
+                    subject={Uri("https://www.biofid.de/ontology#pflanzen'")},
+                    predicate={Uri("https://pato.org/has_petal_count", 2)},
+                    object=LiteralString(begin=15, end=16, text='evil"'),
+                )
+            ],
+        )
+
+        assert "https://www.biofid.de/ontology#pflanzen\\'" in sparql_query_string
+        assert 'evil\\"' in sparql_query_string
 
     @pytest.fixture(scope="session")
     def sparql_generator(self):

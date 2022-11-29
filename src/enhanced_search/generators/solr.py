@@ -51,7 +51,8 @@ class SolrQueryGenerator:
         """Creates a valid SolrQuery object from the given Query.
 
         Notes:
-            * The query string is NOT sanitized!
+            * The query string is sanitized! All Word objects with the attribute
+                `is_safe` set False, will be escaped.
             * URIs are always wrapped in quotation marks.
             * Strings are quoted with double quotation marks.
         """

@@ -49,8 +49,6 @@ class SparqlSemanticEngine:
                 f"?{taxon_variable_name}", query.statements
             )
 
-            print(sparql_query)
-
             db_response_string = self._database.read(sparql_query, is_safe=True)
 
         if db_response_string is not None:
