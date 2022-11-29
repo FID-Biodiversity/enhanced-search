@@ -62,13 +62,18 @@ class SolrDatabase:
         return escape_solr_input(text)
 
 
-def escape_solr_input(query: str) -> str:
+def escape_solr_input(query: str, ignore_quotations: bool = False) -> str:
     """Escapes special characters used by Solr.
 
     Args:
         query: The query to escape.
+        ignore_quotations: If True, single and double quotation marks are not
+                            escaped.
     """
-    solr_escape_characters = tuple("&|+\\!(){}[\\]*^~?:$=\"'")
+    solr_escape_characters = list("&|+\\!(){}[\\]*^~?:$=")
+    if not ignore_quotations:
+        solr_escape_characters.extend(['"', "'"])
+
     return escape_characters(text=query, escape_characters=solr_escape_characters)
 
 

@@ -10,6 +10,8 @@ from enhanced_search.annotation import (
 )
 from enhanced_search.generators import SolrQueryGenerator
 
+# flake8: noqa
+
 
 class TestSolrQueryGenerator:
     @pytest.mark.parametrize(
@@ -51,7 +53,8 @@ class TestSolrQueryGenerator:
                             text="Fagus sylvatica",
                             uris={
                                 Uri(
-                                    url="https://www.biofid.de/ontology/fagus_sylvatica"
+                                    url="https://www.biofid.de/ontology/fagus_sylvatica",
+                                    is_safe=True,
                                 )
                             },
                         )
@@ -69,7 +72,8 @@ class TestSolrQueryGenerator:
                             text="Fagus sylvatica",
                             uris={
                                 Uri(
-                                    url="https://www.biofid.de/ontology/fagus_sylvatica"
+                                    url="https://www.biofid.de/ontology/fagus_sylvatica",
+                                    is_safe=True,
                                 )
                             },
                         )
@@ -88,7 +92,8 @@ class TestSolrQueryGenerator:
                             text="Fagus sylvatica",
                             uris={
                                 Uri(
-                                    url="https://www.biofid.de/ontology/fagus_sylvatica"
+                                    url="https://www.biofid.de/ontology/fagus_sylvatica",
+                                    is_safe=True,
                                 )
                             },
                         )
@@ -110,9 +115,13 @@ class TestSolrQueryGenerator:
                             is_quoted=True,
                             uris={
                                 Uri(
-                                    url="https://www.biofid.de/ontology/fagus_sylvatica"
+                                    url="https://www.biofid.de/ontology/fagus_sylvatica",
+                                    is_safe=True,
                                 ),
-                                Uri(url="https://www.biofid.de/ontology/another_fagus"),
+                                Uri(
+                                    url="https://www.biofid.de/ontology/another_fagus",
+                                    is_safe=True,
+                                ),
                             },
                         )
                     ],
@@ -120,8 +129,14 @@ class TestSolrQueryGenerator:
                     statements=[
                         Statement(
                             subject={
-                                Uri("https://www.biofid.de/ontology/fagus_sylvatica"),
-                                Uri("https://www.biofid.de/ontology/another_fagus"),
+                                Uri(
+                                    "https://www.biofid.de/ontology/fagus_sylvatica",
+                                    is_safe=True,
+                                ),
+                                Uri(
+                                    "https://www.biofid.de/ontology/another_fagus",
+                                    is_safe=True,
+                                ),
                             },
                             object=LiteralString(begin=21, end=24, text="Foo"),
                             relationship=RelationshipType.AND,
@@ -142,9 +157,13 @@ class TestSolrQueryGenerator:
                             is_quoted=True,
                             uris={
                                 Uri(
-                                    url="https://www.biofid.de/ontology/fagus_sylvatica"
+                                    url="https://www.biofid.de/ontology/fagus_sylvatica",
+                                    is_safe=True,
                                 ),
-                                Uri(url="https://www.biofid.de/ontology/another_fagus"),
+                                Uri(
+                                    url="https://www.biofid.de/ontology/another_fagus",
+                                    is_safe=True,
+                                ),
                             },
                         )
                     ],
@@ -152,8 +171,14 @@ class TestSolrQueryGenerator:
                     statements=[
                         Statement(
                             subject={
-                                Uri("https://www.biofid.de/ontology/fagus_sylvatica"),
-                                Uri("https://www.biofid.de/ontology/another_fagus"),
+                                Uri(
+                                    "https://www.biofid.de/ontology/fagus_sylvatica",
+                                    is_safe=True,
+                                ),
+                                Uri(
+                                    "https://www.biofid.de/ontology/another_fagus",
+                                    is_safe=True,
+                                ),
                             },
                             object=LiteralString(begin=21, end=24, text="Foo"),
                             relationship=RelationshipType.OR,
@@ -180,6 +205,28 @@ class TestSolrQueryGenerator:
                 ),
                 "q:Foo OR q:Bar",
             ),
+            (  # Scenario - Unsafe input data
+                Query(
+                    original_string="Fagus sylvatica 'Foo Bar'",
+                    annotations=[
+                        Annotation(
+                            begin=0,
+                            end=15,
+                            text="Fagus sylvatica",
+                            uris={
+                                Uri(
+                                    url="https://www.biofid.de/ontology/fagus_sylvatica",
+                                )
+                            },
+                        )
+                    ],
+                    literals=[
+                        LiteralString(begin=16, end=25, text="Foo Bar", is_quoted=True)
+                    ],
+                ),
+                'q:"https\\://www.biofid.de/ontology/fagus_sylvatica" AND '
+                'q:"Foo Bar"',
+            ),
         ],
     )
     def test_to_solr_query(
@@ -205,7 +252,8 @@ class TestSolrQueryGenerator:
                             text="Fagus sylvatica",
                             uris={
                                 Uri(
-                                    url="https://www.biofid.de/ontology/fagus_sylvatica"
+                                    url="https://www.biofid.de/ontology/fagus_sylvatica",
+                                    is_safe=True,
                                 )
                             },
                         )

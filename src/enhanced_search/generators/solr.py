@@ -14,6 +14,7 @@ from enhanced_search.annotation import (
     Statement,
     Uri,
 )
+from enhanced_search.databases.documents import escape_solr_input
 
 OR_STRING = "OR"
 AND_STRING = "AND"
@@ -267,9 +268,15 @@ def _create_or_conjunction(
 
 def _setup_entity(entity: Union[Uri, LiteralString]) -> str:
     if isinstance(entity, Uri):
-        text = f'"{entity.url}"'
+        if not entity.is_safe:
+            text = f'"{escape_solr_input(entity.url)}"'
+        else:
+            text = f'"{entity.url}"'
     elif isinstance(entity, LiteralString):
-        text = str(entity)
+        if not entity.is_safe:
+            text = escape_solr_input(str(entity), ignore_quotations=True)
+        else:
+            text = str(entity)
     else:
         raise NotImplementedError(f"The given type {type(entity)} cannot be setup!")
 
