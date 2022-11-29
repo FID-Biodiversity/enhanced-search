@@ -17,11 +17,12 @@ classifiers = [
     "OSI Approved :: GNU Affero General Public License v3"
 ]
 dependencies = [
+    "pysolr==3.9.0",
+    "redis==4.3.5",
     "simplemma==0.9.0",
+    "solrq==1.1.2",
     "SPARQL-Burger==1.0.1",
     "SPARQLWrapper==2.0.0",
-    "redis==4.3.5",
-    "solrq==1.1.2"
 ]
 version = "0.1.0"
 
@@ -50,6 +51,7 @@ dev = [
     # Testing Dependencies
     "rdflib",
     "fakeredis",
+    "responses"
 ]
 
 [tool.pytest.ini_options]
