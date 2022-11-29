@@ -143,7 +143,7 @@ When inspecting the JSON string further, you see that there is a nested list ass
 ```python
 {'paris': '{
     "Location_Place": [["https://sws.geonames.org/paris", 3]],
-    "Plant_Flora": [["https://www.biofid.de/ontology/paris", 3], 
+    "Plant_Flora": [["https://www.biofid.de/ontology/paris", 3],
                     ["https://www.biofid.de/ontology/another_paris_uri, 3]
 }'}
 ```
@@ -211,9 +211,9 @@ query_processor.resolve_query_annotations(query)
 
 print([uri.url for uri in query.annotations[0].uris])
 # Output:
-# ['https://www.biofid.de/ontology/plant_with_red_flower_1', 
-# 'https://www.biofid.de/ontology/plant_with_red_flower_3', 
-# 'https://www.biofid.de/ontology/plant_with_red_flower_2', 
+# ['https://www.biofid.de/ontology/plant_with_red_flower_1',
+# 'https://www.biofid.de/ontology/plant_with_red_flower_3',
+# 'https://www.biofid.de/ontology/plant_with_red_flower_2',
 # 'https://www.biofid.de/ontology/plant_with_red_flower_and_3_petals']
 ```
 
@@ -225,9 +225,9 @@ The original data is not lost. It is stored in the `features` variable of the re
 print(query.annotations[0].features)
 # Output:
 # [Feature(
-#   property=None, value={Uri(url='https://www.biofid.de/ontology/pflanzen', position_in_triple=3, is_safe=False, labels=set(), parent=None, children=set())}), 
+#   property=None, value={Uri(url='https://www.biofid.de/ontology/pflanzen', position_in_triple=3, is_safe=False, labels=set(), parent=None, children=set())}),
 # Feature(
-#   property={Uri(url='https://pato.org/flower_part', position_in_triple=2, is_safe=False, labels=set(), parent=None, children=set())}, 
+#   property={Uri(url='https://pato.org/flower_part', position_in_triple=2, is_safe=False, labels=set(), parent=None, children=set())},
 #   value={Uri(url='https://pato.org/red_color', position_in_triple=3, is_safe=False, labels=set(), parent=None, children=set())}
 #)]
 ```
@@ -251,9 +251,9 @@ solr_query_generator.default_conjunction_type = RelationshipType.AND
 solr_query = solr_query_generator.to_solr_query(query)
 
 print(solr_query.string)
-# Output: my-search-field:("https://www.biofid.de/ontology/plant_with_red_flower_1" 
-# OR "https://www.biofid.de/ontology/plant_with_red_flower_2" 
-# OR "https://www.biofid.de/ontology/plant_with_red_flower_3" 
+# Output: my-search-field:("https://www.biofid.de/ontology/plant_with_red_flower_1"
+# OR "https://www.biofid.de/ontology/plant_with_red_flower_2"
+# OR "https://www.biofid.de/ontology/plant_with_red_flower_3"
 # OR "https://www.biofid.de/ontology/plant_with_red_flower_and_3_petals")
 # AND my-search-field:mit
 ```
@@ -263,15 +263,15 @@ URIs referencing the same entity are OR-conjuncted. In most use cases this makes
 You also see that the stopword "mit" (engl. "with") is also added the query. There are two ways to get rid of this. Either your Solr engine has a stop word list and hence will ignore it (disregarding if there is an AND-conjunction or not). The other way is to filter the `query.literals` variable for stop words before generating the query.
 
 ```python
-stopwords = {"Ich", "der", "die", "das", "mit"} 
+stopwords = {"Ich", "der", "die", "das", "mit"}
 query.literals = [literal for literal in query.literals if literal.text not in stopwords]
 
 solr_query = solr_query_generator.to_solr_query(query)
 
 print(solr_query.string)
-# Output: my-search-field:("https://www.biofid.de/ontology/plant_with_red_flower_1" 
-# OR "https://www.biofid.de/ontology/plant_with_red_flower_2" 
-# OR "https://www.biofid.de/ontology/plant_with_red_flower_3" 
+# Output: my-search-field:("https://www.biofid.de/ontology/plant_with_red_flower_1"
+# OR "https://www.biofid.de/ontology/plant_with_red_flower_2"
+# OR "https://www.biofid.de/ontology/plant_with_red_flower_3"
 # OR "https://www.biofid.de/ontology/plant_with_red_flower_and_3_petals")
 ```
 
@@ -324,6 +324,7 @@ db = factory.create("key-value")
 | ------------- | ------------|
 |[Redis](https://redis.io/)| `enhanced_search.databases.key_value.RedisDatabase`|
 |Any SPARQL Database| `enhanced_search.databases.graph.SparqlGraphDatabase`|
+|[Apache Solr](https://solr.apache.org/)| `enhanced_search.databases.documents.SolrDatabase`|
 
 ### Semantic Engine
 After you defined the database, you can also define the semantic engine in the variable `SEMANTIC_ENGINES` (if you want to use e.g. the `SemanticQueryProcessor`. Currently, there is only one semantic engine implemented that can translate a query to a SPARQL query and convert back the SPARQL response into a proper Python format.
