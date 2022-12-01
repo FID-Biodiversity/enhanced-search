@@ -3,7 +3,7 @@ import json
 import pytest
 import responses
 
-from enhanced_search.databases.documents import SolrDatabase
+from enhanced_search.databases import SolrDatabase
 from enhanced_search.errors import UserInputException
 
 
