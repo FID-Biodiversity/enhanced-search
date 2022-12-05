@@ -555,7 +555,7 @@ class TestSemanticQueryProcessor:
                     Statement(
                         subject={Uri("https://www.biofid.de/ontology/pflanzen")},
                         object=LiteralString(
-                            begin=14, end=19, text="Hafen", is_safe=False
+                            begin=14, end=19, text="Hafen", lemma="Hafen", is_safe=False
                         ),
                         relationship=RelationshipType.OR,
                     )

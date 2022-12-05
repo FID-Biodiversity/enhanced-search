@@ -25,6 +25,8 @@ class TestSimpleTokenizer:
             ("Das ist ein Test!", [False, False, False, False]),
             ("Ich suche 'Fagus sylvatica'", [False, False, True]),
             ("'Fagus sylvatica' is great!", [True, False, False]),
+            ("'The quoted Journal'", [True]),
+            ('"The quoted Journal"', [True]),
         ],
     )
     def test_token_is_marked_as_quoted(

@@ -1,6 +1,10 @@
-from enhanced_search.annotation import AnnotationResult, LiteralString
+"""Methods used for the annotation of literal strings (i.e. all strings that are
+no named entities).
+"""
 
-from ..utils import tokenize_text
+import itertools
+
+from enhanced_search.annotation import AnnotationResult
 
 
 class LiteralAnnotationEngine:
@@ -9,30 +13,20 @@ class LiteralAnnotationEngine:
     Obeys the AnnotatorEngine interface!
     """
 
-    def parse(self, text: str, annotation_result: AnnotationResult) -> None:
+    def parse(self, _: str, annotation_result: AnnotationResult) -> None:
         """Puts all tokens into a list."""
 
-        annotation_by_start_index = {
-            annotation.begin: annotation
-            for annotation in annotation_result.named_entity_recognition
-        }
+        named_entity_char_positions = set(
+            itertools.chain.from_iterable(
+                range(ne.begin, ne.end + 1)
+                for ne in annotation_result.named_entity_recognition
+            )
+        )
 
-        literals = []
-        token_start = 0
-        last_annotation_end = -1
-        for token in tokenize_text(text):
-            if (
-                token_start not in annotation_by_start_index
-                and token_start > last_annotation_end
-            ):
-                token_end = token_start + len(token)
-                literal = LiteralString(begin=token_start, end=token_end, text=token)
-                literals.append(literal)
-            else:
-                annotation = annotation_by_start_index.get(token_start)
-                if annotation is not None:
-                    last_annotation_end = annotation.end
-
-            token_start += len(token) + 1
+        literals = [
+            token
+            for token in annotation_result.tokens
+            if token.begin not in named_entity_char_positions
+        ]
 
         annotation_result.literals = literals

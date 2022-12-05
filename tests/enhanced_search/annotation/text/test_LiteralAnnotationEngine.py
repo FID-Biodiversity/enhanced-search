@@ -17,19 +17,24 @@ class TestLiteralAnnotationEngine:
         ["text", "annotation_result", "expected_literals"],
         [
             (
-                "Fagus sylvatica",
+                "Fagus sylvatica L.",
                 AnnotationResult(
                     named_entity_recognition=[
                         Annotation(
                             begin=0,
-                            end=15,
-                            text="Fagus",
+                            end=18,
+                            text="Fagus sylvatica L.",
                             named_entity_type=NamedEntityType.PLANT,
                             uris={
                                 Uri("https://www.biofid.de/ontology/fagus_sylvatica")
                             },
                         )
-                    ]
+                    ],
+                    tokens=[
+                        LiteralString(begin=0, end=5, text="Fagus"),
+                        LiteralString(begin=7, end=15, text="sylvatica"),
+                        LiteralString(begin=16, end=18, text="L."),
+                    ],
                 ),
                 [],
             ),
@@ -51,7 +56,12 @@ class TestLiteralAnnotationEngine:
                             named_entity_type=NamedEntityType.LOCATION,
                             uris={Uri("https://sws.geonames.org/deutschland")},
                         ),
-                    ]
+                    ],
+                    tokens=[
+                        LiteralString(begin=0, end=5, text="Fagus"),
+                        LiteralString(begin=6, end=8, text="in"),
+                        LiteralString(begin=9, end=20, text="Deutschland"),
+                    ],
                 ),
                 [LiteralString(begin=6, end=8, text="in", is_safe=False)],
             ),
@@ -79,10 +89,47 @@ class TestLiteralAnnotationEngine:
                             },
                         ),
                     ],
+                    tokens=[
+                        LiteralString(begin=0, end=8, text="Pflanzen"),
+                        LiteralString(begin=9, end=12, text="mit"),
+                        LiteralString(begin=13, end=14, text="3"),
+                        LiteralString(begin=15, end=28, text="Kelchblätter"),
+                    ],
                 ),
                 [
                     LiteralString(begin=9, end=12, text="mit", is_safe=False),
                     LiteralString(begin=13, end=14, text="3", is_safe=False),
+                ],
+            ),
+            (
+                "'The quoted Journal Name' Pflanzen",
+                AnnotationResult(
+                    named_entity_recognition=[
+                        Annotation(
+                            begin=26,
+                            end=34,
+                            text="Pflanzen",
+                            named_entity_type=NamedEntityType.PLANT,
+                            uris={Uri("https://www.biofid.de/ontology/pflanzen")},
+                        )
+                    ],
+                    tokens=[
+                        LiteralString(
+                            begin=0,
+                            end=25,
+                            text="The quoted Journal Name",
+                            is_quoted=True,
+                        ),
+                        LiteralString(begin=26, end=34, text="Pflanzen"),
+                    ],
+                ),
+                [
+                    LiteralString(
+                        begin=0,
+                        end=25,
+                        text="The quoted Journal Name",
+                        is_quoted=True,
+                    )
                 ],
             ),
         ],

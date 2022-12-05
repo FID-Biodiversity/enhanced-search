@@ -22,8 +22,8 @@ class TestTextAnnotator:
                     ),
                 ],
                 [
-                    LiteralString(begin=0, end=3, text="ich"),
-                    LiteralString(begin=4, end=9, text="suche"),
+                    LiteralString(begin=0, end=3, text="ich", lemma="ich"),
+                    LiteralString(begin=4, end=9, text="suche", lemma="suchen"),
                 ],
             ),
             (  # Scenario: Ambiguous terms
@@ -47,7 +47,7 @@ class TestTextAnnotator:
                     ),
                 ],
                 [
-                    LiteralString(begin=6, end=8, text="in"),
+                    LiteralString(begin=6, end=8, text="in", lemma="in"),
                 ],
             ),
             (  # Scenario: All lowercase words and no complete sentence
