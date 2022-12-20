@@ -57,6 +57,7 @@ FALLBACK_DATABASE_DATA = {
     ", 3]]}",
     "rot": '{"Miscellaneous": [["https://pato.org/red_color", 3]]}',
     "blüte": '{"Miscellaneous": [["https://pato.org/flower_part", 2]]}',
+    "gelb blüte": '{"Miscellaneous": [["https://flopo.org/yellow_flower", 3]]}',
 }
 
 # See module factories.DatabaseFactory for an example of how databases are configured.

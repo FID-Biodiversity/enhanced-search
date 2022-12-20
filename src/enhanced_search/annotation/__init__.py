@@ -80,6 +80,16 @@ class Word:
             text = f'"{text}"'
         return text
 
+    def __add__(self, other: "Word"):
+        if not isinstance(other, Word):
+            raise TypeError("Concatenating operation only possible with Word object!")
+        begin = min(self.begin, other.begin)
+        end = max(self.end, other.end)
+        text = f"{self.text} {other.text}"
+        lemma = f"{self.lemma} {other.lemma}"
+
+        return Word(begin=begin, end=end, text=text, lemma=lemma)
+
 
 @dataclass
 class LiteralString(Word):

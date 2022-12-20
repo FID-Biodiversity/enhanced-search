@@ -1,5 +1,7 @@
 """Provides AnnotationEngines for Named Entity Recognition in a text."""
 
+from __future__ import annotations
+
 from typing import Optional, Tuple
 
 from enhanced_search.annotation import Annotation, AnnotationResult, Word
@@ -29,28 +31,39 @@ class StringBasedNamedEntityAnnotatorEngine:
         The method updates the AnnotationResult object.
         """
         retrieved_annotations = []
+        last_annotation_position = -1
 
         for index, token in enumerate(annotation_result.tokens):
+            if token.begin <= last_annotation_position <= token.end:
+                continue
+
             inferenced_text, corresponding_data = self._get_data_for_token(token)
 
             annotation_data = []
             if corresponding_data is not None and inferenced_text is not None:
-                annotation_data.append((token, inferenced_text, corresponding_data))
+                annotation_data.append((token, corresponding_data))
 
             # Quoted strings should be taken as encapsulated entities
-            if inferenced_text is not None and not token.is_quoted:
+            if not token.is_quoted:
+                inferenced_token = token
                 for following_token in annotation_result.tokens[index + 1 :]:
-                    inferenced_text += f" {following_token.text}"
-                    extended_word_data = self._db.read(inferenced_text.lower())
-                    if extended_word_data is not None:
-                        annotation_data.append(
-                            (following_token, inferenced_text, extended_word_data)
+                    inferenced_token = inferenced_token + following_token
+
+                    # Always query with lemma, because otherwise multi-token texts will
+                    # return empty.
+                    if inferenced_token.lemma is not None:
+                        extended_word_data = self._db.read(
+                            inferenced_token.lemma.lower()
                         )
+                        if extended_word_data is not None:
+                            annotation_data.append(
+                                (inferenced_token, extended_word_data)
+                            )
 
             if annotation_data:
-                relevant_data = annotation_data[-1]
-                end_token, word_text, data = relevant_data
-                ann = self._create_annotation(token, end_token, word_text, data)
+                inferenced_token, data = annotation_data[-1]
+                ann = self._create_annotation(inferenced_token, data)
+                last_annotation_position = ann.end
                 retrieved_annotations.append(ann)
 
         annotation_result.named_entity_recognition = retrieved_annotations
@@ -69,24 +82,11 @@ class StringBasedNamedEntityAnnotatorEngine:
 
     def _create_annotation(
         self,
-        start_token: Word,
-        end_token: Word,
-        text: str,
+        token: Word,
         annotation_data: str,
     ):
-        def is_multi_token_word():
-            return start_token != end_token
-
-        if is_multi_token_word():
-            lemma = text
-        else:
-            lemma = (
-                start_token.lemma if start_token.lemma is not None else start_token.text
-            )
-            text = start_token.text
-
         annotation = Annotation(
-            begin=start_token.begin, end=end_token.end, text=text, lemma=lemma
+            begin=token.begin, end=token.end, text=token.text, lemma=token.lemma
         )
         update_annotation_with_data(annotation, annotation_data)
         return annotation

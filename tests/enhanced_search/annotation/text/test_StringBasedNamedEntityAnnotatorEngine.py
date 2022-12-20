@@ -222,6 +222,29 @@ class TestStringBasedNamedEntityAnnotatorEngine:
                     )
                 ],
             ),
+            (
+                [
+                    LiteralString(begin=0, end=8, text="Pflanzen", lemma="Pflanze"),
+                    LiteralString(begin=9, end=15, text="gelben", lemma="gelb"),
+                    LiteralString(begin=16, end=22, text="Blüten", lemma="Blüte"),
+                ],
+                [
+                    Annotation(
+                        begin=0,
+                        end=8,
+                        text="Pflanzen",
+                        lemma="Pflanze",
+                        named_entity_type=NamedEntityType.PLANT,
+                    ),
+                    Annotation(
+                        begin=9,
+                        end=22,
+                        lemma="gelb Blüte",
+                        text="gelben Blüten",
+                        named_entity_type=NamedEntityType.MISCELLANEOUS,
+                    ),
+                ],
+            ),
         ],
     )
     def test_parse(
