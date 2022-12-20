@@ -105,6 +105,37 @@ class TestPatternDependencyAnnotationEngine:
                 ),
                 [{"subject": "0/8", "predicate": "19/25", "object": "13/18"}],
             ),
+            (  # Scenario - A taxon with a filtering property (filtering property is
+                # multi-token entity containing both adjective and noun)
+                "Pflanzen mit gelben Blüten",
+                AnnotationResult(
+                    named_entity_recognition=[
+                        Annotation(
+                            begin=0,
+                            end=8,
+                            text="Pflanzen",
+                            named_entity_type=NamedEntityType.PLANT,
+                            uris={Uri("https://www.biofid.de/ontology/pflanzen")},
+                        ),
+                        Annotation(
+                            begin=13,
+                            end=26,
+                            text="gelben Blüten",
+                            named_entity_type=NamedEntityType.MISCELLANEOUS,
+                            uris={
+                                Uri(
+                                    url="https://flopo.org/yellow_flower",
+                                    position_in_triple=3,
+                                )
+                            },
+                        ),
+                    ],
+                    literals=[
+                        LiteralString(begin=9, end=12, text="mit", is_safe=False)
+                    ],
+                ),
+                [{"subject": "0/8", "predicate": None, "object": "13/26"}],
+            ),
             (  # Scenario - A taxon with a filtering property (one is a user set value)
                 "Pflanzen mit 3 Kelchblättern",
                 AnnotationResult(

@@ -90,8 +90,8 @@ class TaxonPropertyPattern(Pattern):
 
     regex_pattern = re.compile(
         r"{.*?(?:taxon|plant|animal)<(?P<subject>.+?)>} +(?:mit<.+?> +|with<.+?> +)?"
-        r"{.*?miscellaneous<(?P<object>.+?)>} +"
-        r"{.*?miscellaneous<(?P<predicate>.+?)>}"
+        r"{.*?miscellaneous<(?P<object>.+?)>}"
+        r"(?: +{.*?miscellaneous<(?P<predicate>.+?)>})?"
     )
 
 
@@ -139,8 +139,8 @@ class PatternDependencyAnnotationEngine:
     """
 
     patterns = [
-        TaxonPropertyPattern(),
         TaxonNumericalPropertyPattern(),
+        TaxonPropertyPattern(),
         AndConjunctionPattern(),
         OrConjunctionPattern(),
     ]
