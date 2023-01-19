@@ -34,7 +34,7 @@ class SimpleLemmatizer:
         for token in annotation_result.tokens:
             text = token.text
 
-            if text.lower() in ["der", "die", "das"]:
+            if text.lower() in {"der", "die", "das"}:
                 # Catch issue in simplemma that will not be fixed.
                 # (https://github.com/adbar/simplemma/issues/28)
                 token.lemma = text
