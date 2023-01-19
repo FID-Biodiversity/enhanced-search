@@ -3,16 +3,13 @@ from typing import List, Optional
 
 import pytest
 
-from enhanced_search.annotation import AnnotationResult, LiteralString
+from enhanced_search.annotation import AnnotationResult
 
 
 @dataclass
-class Token(LiteralString):
-    def __init__(self, text: str, lemma: Optional[str] = None):
-        self.text = text
-        self.lemma = lemma
-        self.begin = 0
-        self.end = 1
+class Token:
+    text: str
+    lemma: Optional[str] = None
 
 
 class TestSimpleLemmatizer:
