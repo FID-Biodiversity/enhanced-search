@@ -22,8 +22,15 @@ from enhanced_search.databases.graph import KnowledgeDatabase
 class SemanticEngine(Protocol):
     """An interface class to inference the semantics of a query."""
 
-    def generate_query_semantics(self, query: Query) -> dict:
-        """Takes a query and returns data retrieved e.g. from its annotations."""
+    def generate_query_semantics(
+        self, query: Query, limit: Optional[int] = None
+    ) -> dict:
+        """Takes a query and returns data retrieved e.g. from its annotations.
+
+        Args:
+            query: The query object to provide the semantics.
+            limit: The maximum number of results to return.
+        """
 
 
 class SparqlSemanticEngine:
