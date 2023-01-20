@@ -2,7 +2,7 @@
 
 import json
 from copy import deepcopy
-from typing import List, Protocol, runtime_checkable
+from typing import List, Optional, Protocol, runtime_checkable
 
 from SPARQLBurger.SPARQLQueryBuilder import SPARQLGraphPattern, SPARQLSelectQuery
 from SPARQLBurger.SPARQLSyntaxTerms import Prefix, Triple
@@ -39,14 +39,21 @@ class SparqlSemanticEngine:
         self._database = database
         self._sparql_generator = SparqlQueryGenerator()
 
-    def generate_query_semantics(self, query: Query) -> dict:
-        """Takes a Query and returns additional data on its Annotations."""
+    def generate_query_semantics(
+        self, query: Query, limit: Optional[int] = None
+    ) -> dict:
+        """Takes a Query and returns additional data on its Annotations.
+
+        Args:
+            query: The query object to provide the semantics.
+            limit: The maximum number of results to return.
+        """
         taxon_variable_name = "taxon"
         db_response_string = None
 
         if query.statements:
             sparql_query = self._sparql_generator.generate(
-                f"?{taxon_variable_name}", query.statements
+                f"?{taxon_variable_name}", query.statements, limit=limit
             )
 
             db_response_string = self._database.read(sparql_query, is_safe=True)
@@ -104,9 +111,19 @@ class SparqlQueryGenerator:
         self.select_limit = self.DEFAULT_LIMIT
         self.namespaces = self.NAMESPACES
 
-    def generate(self, variable_name: str, statements: List[Statement]) -> str:
+    def generate(
+        self,
+        variable_name: str,
+        statements: List[Statement],
+        limit: Optional[int] = None,
+    ) -> str:
         """Generates a new SPARQL query string from the given context.
+
         The variable name(s) provided have to be prefixed with a "?", e.g. "?parent".
+
+        To limit the number of results, give `limit` a positive integer. If this
+        limit should always apply, you should set the `select_limit` attribute of
+        the object.
         """
 
         select_pattern = self._setup_select_query(namespaces=self.namespaces)
@@ -126,7 +143,8 @@ class SparqlQueryGenerator:
 
         select_query_string = select_pattern.get_text()
 
-        select_query_string += f"ORDER BY {variable_name}\n LIMIT {self.select_limit}"
+        limit = self.select_limit if limit is None else limit
+        select_query_string += f"ORDER BY {variable_name}\n LIMIT {limit}"
 
         return select_query_string
 

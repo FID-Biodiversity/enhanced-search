@@ -81,6 +81,35 @@ class TestSparqlQueryGenerator:
             == expected_data
         )
 
+    def test_restrict_number_of_results(self, sparql_generator, sparql_db):
+        """Feature: There is an option to set a maximum of returned results."""
+        variable_name = "taxon"
+        statements = [
+            Statement(
+                subject={Uri("https://www.biofid.de/ontology/pflanzen")},
+                predicate={Uri("https://pato.org/flower_part", 2)},
+                object={Uri("https://pato.org/red_color", 3)},
+            )
+        ]
+
+        sparql_query_string = sparql_generator.generate(
+            variable_name=f"?{variable_name}", statements=statements
+        )
+        db_response_string = sparql_db.read(sparql_query_string)
+        assert (
+            len(extract_data_from_graph_response(variable_name, db_response_string))
+            == 4
+        )
+
+        sparql_query_string = sparql_generator.generate(
+            variable_name=f"?{variable_name}", statements=statements, limit=1
+        )
+        db_response_string = sparql_db.read(sparql_query_string)
+        assert (
+            len(extract_data_from_graph_response(variable_name, db_response_string))
+            == 1
+        )
+
     def test_character_escaping(self, sparql_generator):
         """Feature: Potential malicious characters are escaped."""
         sparql_query_string = sparql_generator.generate(
