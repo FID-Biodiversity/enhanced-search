@@ -22,11 +22,14 @@ from enhanced_search.databases.graph import KnowledgeDatabase
 class SemanticEngine(Protocol):
     """An interface class to inference the semantics of a query."""
 
-    def generate_query_semantics(self, query: Query) -> dict:
+    def generate_query_semantics(
+        self, query: Query, limit: Optional[int] = None
+    ) -> dict:
         """Takes a query and returns data retrieved e.g. from its annotations.
 
         Args:
             query: The query object to provide the semantics.
+            limit: The number of maximum results to return.
         """
 
 
@@ -37,28 +40,27 @@ class SparqlSemanticEngine:
         Add query sanitization!
 
     Obeys the SemanticEngine interface.
-
-    Attributes:
-        limit: The number of maximum results to return from the Sparql database.
     """
 
     def __init__(self, database: KnowledgeDatabase):
-        self.limit: Optional[int] = None
         self._database = database
         self._sparql_generator = SparqlQueryGenerator()
 
-    def generate_query_semantics(self, query: Query) -> dict:
+    def generate_query_semantics(
+        self, query: Query, limit: Optional[int] = None
+    ) -> dict:
         """Takes a Query and returns additional data on its Annotations.
 
         Args:
             query: The query object to provide the semantics.
+            limit: The number of maximum results to return.
         """
         taxon_variable_name = "taxon"
         db_response_string = None
 
         if query.statements:
             sparql_query = self._sparql_generator.generate(
-                f"?{taxon_variable_name}", query.statements, limit=self.limit
+                f"?{taxon_variable_name}", query.statements, limit=limit
             )
 
             db_response_string = self._database.read(sparql_query, is_safe=True)

@@ -47,7 +47,11 @@ class SemanticQueryProcessor:
 
     def update_query_with_annotations(self, query: Query) -> None:
         """Adds further semantic data to the given query.
+
         The query object is updated in-place!
+
+        Args:
+            query: The query object to process.
         """
         if self.text_annotator is None:
             raise ValueError("The TextAnnotator is not set! Operation not possible!")
@@ -63,20 +67,28 @@ class SemanticQueryProcessor:
             literals=query.literals,
         )
 
-    def resolve_query_annotations(self, query: Query) -> None:
+    def resolve_query_annotations(
+        self, query: Query, limit: Optional[int] = None
+    ) -> None:
         """Adds further data to the annotations of the query.
         This is e.g. inferencing URIs of Annotations, if necessary (i.e. querying
         URIs of Annotation features like "plants with red flowers").
         If the inferencing is successful, and there are URIs in the database fitting
         the criteria, the received URIs are updating the Annotations uris. The original
         URI(s) for this annotation
+
+        Args:
+            query: The query object to process.
+            limit: A positive integer, setting the maximum number of returned results.
         """
         if self.semantic_engine_name is None:
             raise ValueError("The Semantic Engine is not set! Operation not possible!")
 
         engine_factory = SemanticEngineFactory()
         semantic_engine = engine_factory.create(self.semantic_engine_name)
-        additional_annotation_data = semantic_engine.generate_query_semantics(query)
+        additional_annotation_data = semantic_engine.generate_query_semantics(
+            query, limit=limit
+        )
 
         update_annotations(additional_annotation_data, query)
 

@@ -217,7 +217,7 @@ print([uri.url for uri in query.annotations[0].uris])
 # 'https://www.biofid.de/ontology/plant_with_red_flower_and_3_petals']
 ```
 
-The `resolve_query_annotations` method used the database in the background to look up which taxa fit the criteria given in the query's `statements`.
+The `resolve_query_annotations` method used the database in the background to look up which taxa fit the criteria given in the query's `statements`. If you want to restrict the number of returned results by this method, you can provide a positive integer value with the `limit` parameter, like so: `query_processor.resolve_query_annotations(query, limit=100)`.
 
 The original data is not lost. It is stored in the `features` variable of the respective annotation.
 
