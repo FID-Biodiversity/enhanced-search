@@ -119,6 +119,7 @@ class Annotation(Word):
     named_entity_type: Optional[NamedEntityType] = None
     ambiguous_annotations: Set["Annotation"] = field(default_factory=set)
     features: List[Feature] = field(default_factory=list)
+    is_feature: bool = False
 
     def __hash__(self):
         return hash((self.begin, self.end, self.named_entity_type))

@@ -334,7 +334,7 @@ class TestSemanticQueryProcessor:
                             end=8,
                             text="Pflanzen",
                             named_entity_type=NamedEntityType.PLANT,
-                            uris=set(),
+                            uris={Uri("https://www.biofid.de/ontology/pflanzen")},
                             features=[
                                 Feature(
                                     property=None,

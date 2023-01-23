@@ -2,6 +2,7 @@ import pytest
 
 from enhanced_search.annotation import (
     Annotation,
+    Feature,
     LiteralString,
     Query,
     RelationshipType,
@@ -80,7 +81,7 @@ class TestSolrQueryGenerator:
                     ],
                     literals=[LiteralString(begin=16, end=20, text="Test")],
                 ),
-                'q:"https://www.biofid.de/ontology/fagus_sylvatica" AND ' "q:Test",
+                'q:"https://www.biofid.de/ontology/fagus_sylvatica" AND q:Test',
             ),
             (  # Scenario - An Annotation with a quoted literal
                 Query(
@@ -145,6 +146,79 @@ class TestSolrQueryGenerator:
                 ),
                 'q:("https://www.biofid.de/ontology/another_fagus" OR '
                 '"https://www.biofid.de/ontology/fagus_sylvatica") AND q:Foo',
+            ),
+            (  # Scenario - Two NEs in an AND-Conjunction
+                Query(
+                    original_string="Fagus sylvatica und Quercus",
+                    annotations=[
+                        Annotation(
+                            begin=0,
+                            end=15,
+                            text="Fagus sylvatica",
+                            is_quoted=False,
+                            uris={
+                                Uri(
+                                    url="https://www.biofid.de/ontology"
+                                    "/another_fagus",
+                                    is_safe=True,
+                                ),
+                                Uri(
+                                    url="https://www.biofid.de/ontology"
+                                    "/another_fagus",
+                                    is_safe=True,
+                                ),
+                            },
+                            features=[
+                                Feature(
+                                    value={
+                                        Uri(
+                                            url="https://www.biofid.de/ontology"
+                                            "/another_fagus",
+                                            is_safe=True,
+                                        ),
+                                        Uri(
+                                            url="https://www.biofid.de/ontology"
+                                            "/another_fagus",
+                                            is_safe=True,
+                                        ),
+                                    }
+                                ),
+                                Feature(
+                                    value={
+                                        Uri(
+                                            url="https://www.biofid.de/ontology/quercus",
+                                            is_safe=True,
+                                        )
+                                    }
+                                ),
+                            ],
+                        )
+                    ],
+                    statements=[
+                        Statement(
+                            subject={
+                                Uri(
+                                    "https://www.biofid.de/ontology/fagus_sylvatica",
+                                    is_safe=True,
+                                ),
+                                Uri(
+                                    "https://www.biofid.de/ontology/another_fagus",
+                                    is_safe=True,
+                                ),
+                            },
+                            object={
+                                Uri(
+                                    "https://www.biofid.de/ontology/quercus",
+                                    is_safe=True,
+                                )
+                            },
+                            relationship=RelationshipType.AND,
+                        )
+                    ],
+                ),
+                'q:("https://www.biofid.de/ontology/another_fagus" OR '
+                '"https://www.biofid.de/ontology/fagus_sylvatica") AND '
+                'q:"https://www.biofid.de/ontology/quercus"',
             ),
             (  # Scenario - OR-Relationship
                 Query(

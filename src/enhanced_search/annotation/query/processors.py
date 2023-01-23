@@ -124,7 +124,9 @@ def update_annotation_features(query: Query) -> None:
 
             if annotation is not None:
                 create_features_from_statements(annotation, statement)
-                annotation.uris = set()
+
+                for feature in annotation.features:
+                    _update_feature(feature, annotation, annotation_by_uri_index)
 
 
 def create_features_from_statements(
@@ -191,6 +193,7 @@ def create_statements_from_dependencies(
 
 def update_query(query: Query) -> None:
     """Updates the internal consistency of the Query object.
+
     This method removes all Annotations that were assigned to
     be Features of another Annotation.
     """
@@ -202,7 +205,7 @@ def update_query(query: Query) -> None:
     uri_to_annotation_index = {
         freeze_key(annotation.uris): annotation
         for annotation in query.annotations
-        if annotation.uris
+        if annotation.is_feature
     }
 
     annotations_to_remove = set()
@@ -243,6 +246,22 @@ def create_feature_from_uris(
         feature.value = uris
 
     return feature
+
+
+def _update_feature(
+    feature: Feature, annotation: Annotation, annotation_by_uri_index: dict
+) -> None:
+    for attr in [feature.value, feature.property]:
+        if attr is None:
+            continue
+
+        referencing_annotation = annotation_by_uri_index.get(freeze_key(attr))
+        if (
+            referencing_annotation is not None
+            and referencing_annotation is not annotation
+        ):
+            # Mark only non-self referencing annotations as feature
+            referencing_annotation.is_feature = True
 
 
 def freeze_key(set_to_freeze: Union[Set[Uri], Uri, LiteralString]) -> tuple:

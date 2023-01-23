@@ -1,7 +1,11 @@
 """Holds generators that are associated with Apache Solr."""
+
+from __future__ import annotations as ann
+
+from collections.abc import Collection
 from copy import copy
 from dataclasses import dataclass
-from typing import Any, Collection, List, Optional, Set, Union
+from typing import Any, List, Optional, Set, Union
 
 from solrq import Q as SolrQueryBuilder
 from solrq import Value
