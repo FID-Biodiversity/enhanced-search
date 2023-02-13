@@ -258,3 +258,33 @@ class TestStringBasedNamedEntityAnnotatorEngine:
         annotation_result.tokens = tokens
         string_based_ne_annotator_engine.parse("Foo", annotation_result)
         assert annotation_result.named_entity_recognition == expected_annotations
+
+    def test_token_oder_should_not_be_annotated(
+        self, string_based_ne_annotator_engine: StringBasedNamedEntityAnnotatorEngine
+    ):
+        """Fix: When searching for 'Fagus oder Quercus', the token 'oder' is annotated
+        as location (referencing the river 'Oder'). But in this context 'oder' should
+        NOT be annotated as anything."""
+        annotation_result = AnnotationResult()
+        annotation_result.tokens = [
+            LiteralString(begin=0, end=5, text="Fagus", lemma="Fagus"),
+            LiteralString(begin=6, end=10, text="oder", lemma="oder"),
+            LiteralString(begin=11, end=18, text="Quercus", lemma="Quercus"),
+        ]
+        string_based_ne_annotator_engine.parse("Foo", annotation_result)
+        assert annotation_result.named_entity_recognition == [
+            Annotation(
+                begin=0,
+                end=5,
+                text="Fagus",
+                lemma="Fagus",
+                named_entity_type=NamedEntityType.PLANT,
+            ),
+            Annotation(
+                begin=11,
+                end=18,
+                lemma="Quercus",
+                text="Quercus",
+                named_entity_type=NamedEntityType.PLANT,
+            ),
+        ]

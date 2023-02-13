@@ -26,6 +26,8 @@ ANNOTATION_PRIORITY = [
     MISC_ANNOTATION_STRING,
 ]
 
+IGNORE_AS_NAMED_ENTITY = {"oder", "and"}
+
 SUBJECT_STRING = "subject"
 PREDICATE_STRING = "predicate"
 OBJECT_STRING = "object"
@@ -58,6 +60,7 @@ FALLBACK_DATABASE_DATA = {
     "rot": '{"Miscellaneous": [["https://pato.org/red_color", 3]]}',
     "blüte": '{"Miscellaneous": [["https://pato.org/flower_part", 2]]}',
     "gelb blüte": '{"Miscellaneous": [["https://flopo.org/yellow_flower", 3]]}',
+    "oder": '{"Location_Place": [["https://sws.geonames.org/oder_river", 3]]}',
 }
 
 # See module factories.DatabaseFactory for an example of how databases are configured.

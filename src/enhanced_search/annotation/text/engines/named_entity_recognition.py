@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Optional, Tuple
 
+from enhanced_search import configuration
 from enhanced_search.annotation import Annotation, AnnotationResult, Word
 from enhanced_search.databases.key_value import KeyValueDatabase
 
@@ -34,7 +35,10 @@ class StringBasedNamedEntityAnnotatorEngine:
         last_annotation_position = -1
 
         for index, token in enumerate(annotation_result.tokens):
-            if token.begin <= last_annotation_position <= token.end:
+            if (
+                not is_token_valid(token)
+                or token.begin <= last_annotation_position <= token.end
+            ):
                 continue
 
             inferenced_text, corresponding_data = self._get_data_for_token(token)
@@ -103,9 +107,16 @@ class StringBasedNamedEntityAnnotatorEngine:
         Returns:
             True, if none of the above given criteria applies. False, otherwise.
         """
-        return (
-            not word.isnumeric()
-            and len(word) > 2
-            and not word.startswith("(")
-            and word not in self.STRING_BLACKLIST
+        return all(
+            (
+                not word.isnumeric(),
+                len(word) > 2,
+                not word.startswith("("),
+                word not in self.STRING_BLACKLIST,
+            )
         )
+
+
+def is_token_valid(token: Word) -> bool:
+    """Checks that the given Token object fulfills specific criteria."""
+    return all((token.text.lower() not in configuration.IGNORE_AS_NAMED_ENTITY,))
