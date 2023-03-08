@@ -144,6 +144,19 @@ class TestDataExtractionFromRequest:
                 ),
                 ("$$$",),
             ),
+            # Scenario - Default value is not typed
+            (
+                {},
+                (
+                    {
+                        "name": "list_field",
+                        "parameter_type": str,
+                        "optional": True,
+                        "default": [1],
+                    },
+                ),
+                ([1],),
+            ),
         ],
     )
     def test_get_from_data_for_valid_data(

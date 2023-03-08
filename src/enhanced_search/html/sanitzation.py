@@ -36,7 +36,11 @@ def get_from_data(
 
     parameter_value = data.get(name, default)
 
-    if parameter_value is not None and parameter_type is not None:
+    if (
+        parameter_value is not None
+        and parameter_type is not None
+        and parameter_value != default  # Default value is not typed!
+    ):
         try:
             if isinstance(parameter_value, list):
                 parameter_value = [parameter_type(value) for value in parameter_value]
