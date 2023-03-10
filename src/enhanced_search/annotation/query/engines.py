@@ -114,6 +114,10 @@ class SparqlQueryGenerator:
         "terms:acceptedNameUsageID",
     ]
 
+    TRAIT_PREDICATE_URI = "https://www.biofid.de/bio-ontologies/terms/predicate"
+    TRAIT_OBJECT_URI = "https://www.biofid.de/bio-ontologies/terms/object"
+    HAS_TRAIT_URI = "https://www.biofid.de/bio-ontologies/terms/hasTrait"
+
     def __init__(self):
         self.select_limit = self.DEFAULT_LIMIT
         self.namespaces = self.NAMESPACES
@@ -214,36 +218,54 @@ class SparqlQueryGenerator:
 
         predicate_variable_name = "?predicates"
         values_variable_name = "?predicateValues"
+        trait_variable_name = "?trait"
+
         if predicates is not None:
             predicate_values = " ".join(
                 prepare_value_for_sparql(uri) for uri in predicates
             )
+
             value_triple = Triple(
                 subject="VALUES",
                 predicate=predicate_variable_name,
                 object=f"{{{predicate_values}}}",
             )
-            pattern.add_triples([value_triple])
+
+            trait_retrieval_triple_by_predicate = Triple(
+                subject=trait_variable_name,
+                predicate=prepare_value_for_sparql(self.TRAIT_PREDICATE_URI),
+                object=predicate_values,
+            )
+
+            pattern.add_triples([value_triple, trait_retrieval_triple_by_predicate])
 
         if values is not None:
             if isinstance(values, LiteralString):
                 values_variable_name = prepare_value_for_sparql(values)
             elif len(values) > 1:
-                values_values = " ".join(
+                values_string = " ".join(
                     prepare_value_for_sparql(uri) for uri in values
                 )
+
                 value_triple = Triple(
                     subject="VALUES",
-                    predicate=values_variable_name,
-                    object=f"{{{values_values}}}",
+                    predicate=prepare_value_for_sparql(values_variable_name),
+                    object=f"{{{values_string}}}",
                 )
                 pattern.add_triples([value_triple])
             else:
                 values_variable_name = prepare_value_for_sparql(values.pop())
 
+            trait_retrieval_triple_by_object = Triple(
+                subject=trait_variable_name,
+                predicate=prepare_value_for_sparql(self.TRAIT_OBJECT_URI),
+                object=values_variable_name,
+            )
+            pattern.add_triples([trait_retrieval_triple_by_object])
+
         triple = Triple(
             subject=taxon_variable_name,
-            predicate=predicate_variable_name,
-            object=values_variable_name,
+            predicate=prepare_value_for_sparql(self.HAS_TRAIT_URI),
+            object=trait_variable_name,
         )
         pattern.add_triples([triple])
