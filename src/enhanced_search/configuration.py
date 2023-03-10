@@ -61,6 +61,7 @@ FALLBACK_DATABASE_DATA = {
     "blüte": '{"Miscellaneous": [["https://pato.org/flower_part", 2]]}',
     "gelb blüte": '{"Miscellaneous": [["https://flopo.org/yellow_flower", 3]]}',
     "oder": '{"Location_Place": [["https://sws.geonames.org/oder_river", 3]]}',
+    "vogel": '{"Animal_Fauna": [["https://www.biofid.de/ontology/voegel", 3]]}',
 }
 
 # See module factories.DatabaseFactory for an example of how databases are configured.

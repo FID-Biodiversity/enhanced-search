@@ -69,17 +69,21 @@ class SemanticQueryProcessor:
 
     def resolve_query_annotations(
         self, query: Query, limit: Optional[int] = None
-    ) -> None:
+    ) -> bool:
         """Adds further data to the annotations of the query.
+
         This is e.g. inferencing URIs of Annotations, if necessary (i.e. querying
         URIs of Annotation features like "plants with red flowers").
         If the inferencing is successful, and there are URIs in the database fitting
-        the criteria, the received URIs are updating the Annotations uris. The original
-        URI(s) for this annotation
+        the criteria, the received URIs are updating the Annotations URIs.
 
         Args:
             query: The query object to process.
             limit: A positive integer, setting the maximum number of returned results.
+
+        Returns:
+            A boolean value to indicate, whether the annotations resolved in more data
+                (True) or if no data could be found for the given criteria (False).
         """
         if self.semantic_engine_name is None:
             raise ValueError("The Semantic Engine is not set! Operation not possible!")
@@ -90,9 +94,13 @@ class SemanticQueryProcessor:
             query, limit=limit
         )
 
-        update_annotations(additional_annotation_data, query)
+        was_enrichment_successful = bool(additional_annotation_data)
 
-        update_query(query)
+        if was_enrichment_successful:
+            update_annotations(additional_annotation_data, query)
+            update_query(query)
+
+        return was_enrichment_successful
 
 
 def update_annotations(annotation_data: dict, query: Query) -> None:

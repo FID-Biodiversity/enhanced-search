@@ -587,6 +587,130 @@ class TestSemanticQueryProcessor:
         query_processor.resolve_query_annotations(query)
         assert query.statements == []
 
+    @pytest.mark.parametrize(
+        ["query", "expected_result"],
+        [
+            (  # Scenario - Enrichment successful
+                Query(
+                    "Pflanzen mit roten Blüten",
+                    annotations=[
+                        Annotation(
+                            begin=0,
+                            end=8,
+                            text="Pflanzen",
+                            named_entity_type=NamedEntityType.PLANT,
+                            uris={Uri("https://www.biofid.de/ontology/pflanzen")},
+                        ),
+                        Annotation(
+                            begin=13,
+                            end=18,
+                            text="roten",
+                            named_entity_type=NamedEntityType.MISCELLANEOUS,
+                            uris={
+                                Uri(
+                                    url="https://pato.org/red_color",
+                                    position_in_triple=3,
+                                )
+                            },
+                        ),
+                        Annotation(
+                            begin=19,
+                            end=25,
+                            text="Blüten",
+                            named_entity_type=NamedEntityType.MISCELLANEOUS,
+                            uris={
+                                Uri(
+                                    url="https://pato.org/flower_part",
+                                    position_in_triple=2,
+                                )
+                            },
+                        ),
+                    ],
+                    literals=[
+                        LiteralString(begin=9, end=12, text="mit", is_safe=False)
+                    ],
+                    statements=[
+                        Statement(
+                            subject={Uri("https://www.biofid.de/ontology/pflanzen")},
+                            predicate={
+                                Uri(
+                                    url="https://pato.org/flower_part",
+                                    position_in_triple=2,
+                                )
+                            },
+                            object={Uri(url="https://pato.org/red_color")},
+                        )
+                    ],
+                ),
+                True,
+            ),
+            (  # Scenario - No data found for the given criteria
+                Query(
+                    "Vögel mit roten Blüten",
+                    annotations=[
+                        Annotation(
+                            begin=0,
+                            end=8,
+                            text="Vögel",
+                            named_entity_type=NamedEntityType.PLANT,
+                            uris={Uri("https://www.biofid.de/ontology/voegel")},
+                        ),
+                        Annotation(
+                            begin=13,
+                            end=18,
+                            text="roten",
+                            named_entity_type=NamedEntityType.MISCELLANEOUS,
+                            uris={
+                                Uri(
+                                    url="https://pato.org/red_color",
+                                    position_in_triple=3,
+                                )
+                            },
+                        ),
+                        Annotation(
+                            begin=19,
+                            end=25,
+                            text="Blüten",
+                            named_entity_type=NamedEntityType.MISCELLANEOUS,
+                            uris={
+                                Uri(
+                                    url="https://pato.org/flower_part",
+                                    position_in_triple=2,
+                                )
+                            },
+                        ),
+                    ],
+                    literals=[
+                        LiteralString(begin=9, end=12, text="mit", is_safe=False)
+                    ],
+                    statements=[
+                        Statement(
+                            subject={Uri("https://www.biofid.de/ontology/voegel")},
+                            predicate={
+                                Uri(
+                                    url="https://pato.org/flower_part",
+                                    position_in_triple=2,
+                                )
+                            },
+                            object={Uri(url="https://pato.org/red_color")},
+                        )
+                    ],
+                ),
+                False,
+            ),
+        ],
+    )
+    def test_resolve_query_annotations_returns_boolean_for_successful_enrichment(
+        self,
+        query: Query,
+        expected_result: bool,
+        query_processor: SemanticQueryProcessor,
+    ):
+        """Feature: The method resolve_query_annotations returns a boolean value to
+        indicate that additional data was found (True) or not (False)."""
+        was_enrichment_successful = query_processor.resolve_query_annotations(query)
+        assert was_enrichment_successful == expected_result
+
     @pytest.fixture
     def query_processor(self, text_annotator: TextAnnotator):
         return SemanticQueryProcessor(

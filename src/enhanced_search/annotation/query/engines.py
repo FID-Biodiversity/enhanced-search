@@ -1,6 +1,7 @@
 """The definitions of all engines running the query enrichment."""
 
 import json
+import logging
 from copy import deepcopy
 from typing import List, Optional, Protocol, runtime_checkable
 
@@ -16,6 +17,8 @@ from enhanced_search.annotation import (
 )
 from enhanced_search.annotation.utils import prepare_value_for_sparql
 from enhanced_search.databases.graph import KnowledgeDatabase
+
+logger = logging.getLogger(__file__)
 
 
 @runtime_checkable
@@ -62,6 +65,8 @@ class SparqlSemanticEngine:
             sparql_query = self._sparql_generator.generate(
                 f"?{taxon_variable_name}", query.statements, limit=limit
             )
+
+            logger.debug("Generated SPARQL query:\n%s", sparql_query)
 
             db_response_string = self._database.read(sparql_query, is_safe=True)
 
