@@ -96,9 +96,8 @@ class SemanticQueryProcessor:
 
         was_enrichment_successful = bool(additional_annotation_data)
 
-        if was_enrichment_successful:
-            update_annotations(additional_annotation_data, query)
-            update_query(query)
+        update_annotations(additional_annotation_data, query)
+        update_query(query)
 
         return was_enrichment_successful
 

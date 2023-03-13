@@ -1,9 +1,17 @@
-[[responses]]
-
-[responses.response]
-method = "GET"
-url = "http://localhost:8983/solr/my-core/select/?q=%2A%3A%2A&fl=id&wt=json"
-body = "{\n  \"responseHeader\":{\n    \"status\":0,\n    \"QTime\":0,\n    \"params\":{\n      \"q\":\"*:*\",\n      \"fl\":\"id\",\n      \"wt\":\"json\"}},\n  \"response\":{\"numFound\":827488,\"start\":0,\"docs\":[\n      {\n        \"id\":\"BHL:Band:137402\"},\n      {\n        \"id\":\"BHL:Band:137403\"},\n      {\n        \"id\":\"BHL:Band:137404\"},\n      {\n        \"id\":\"BHL:Band:137405\"},\n      {\n        \"id\":\"BHL:Band:137406\"},\n      {\n        \"id\":\"BHL:Band:137407\"},\n      {\n        \"id\":\"BHL:Band:137408\"},\n      {\n        \"id\":\"BHL:Band:137409\"},\n      {\n        \"id\":\"BHL:Band:137410\"},\n      {\n        \"id\":\"BHL:Band:137411\"}]\n  }}\n"
-status = 200
-content_type = "text/plain"
-auto_calculate_content_length = false
+responses:
+- response:
+    auto_calculate_content_length: false
+    body: "{\n  \"responseHeader\":{\n    \"status\":0,\n    \"QTime\":0,\n    \"\
+      params\":{\n      \"q\":\"*:*\",\n      \"fl\":\"id\",\n      \"wt\":\"json\"\
+      }},\n  \"response\":{\"numFound\":827488,\"start\":0,\"numFoundExact\":true,\"\
+      docs\":[\n      {\n        \"id\":\"BHL:Artikel:1\"},\n      {\n        \"id\"\
+      :\"BHL:Artikel:10\"},\n      {\n        \"id\":\"BHL:Artikel:100\"},\n     \
+      \ {\n        \"id\":\"BHL:Artikel:1000\"},\n      {\n        \"id\":\"BHL:Band:1000\"\
+      },\n      {\n        \"id\":\"BHL:Artikel:10000\"},\n      {\n        \"id\"\
+      :\"BHL:Band:100000\"},\n      {\n        \"id\":\"BHL:Band:100001\"},\n    \
+      \  {\n        \"id\":\"BHL:Band:100002\"},\n      {\n        \"id\":\"BHL:Band:100003\"\
+      }]\n  }}\n"
+    content_type: text/plain
+    method: GET
+    status: 200
+    url: http://localhost:8983/solr/my-core/select/?q=%2A%3A%2A&fl=id&wt=json
