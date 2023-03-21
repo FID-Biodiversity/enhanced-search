@@ -1,4 +1,4 @@
-from typing import Iterable, Type
+from typing import Any, Iterable, Type
 
 import pytest
 
@@ -167,6 +167,28 @@ class TestDataExtractionFromRequest:
         )
 
     @pytest.mark.parametrize(
+        ["parameters", "expected_values"],
+        [
+            (
+                {
+                    "name": "term",
+                    "parameter_type": list,
+                    "optional": False,
+                },
+                ["term1", "term2"],
+            )
+        ],
+    )
+    def test_get_from_data_for_list(self, parameters, expected_values):
+        """Feature: The function `get_from_data` can extract lists from a Django
+        QueryDict and sanitizes them.
+        """
+        query_dict = DummyQueryDict()
+        query_dict.data = {"term": ["term1", "term2"]}
+
+        assert get_from_data(query_dict, **parameters) == expected_values
+
+    @pytest.mark.parametrize(
         ["request_data", "function_parameters", "expected_exception"],
         [
             (  # Scenario - Mandatory parameter "term" is missing
@@ -234,3 +256,24 @@ def assert_value_extraction_with_get_from_data(
 ):
     for parameters, value in zip(function_parameters, expected_values):
         assert get_from_data(request_data, **parameters) == value
+
+
+class DummyQueryDict:
+    """A mock object replicating the behaviour of a Django QueryDict."""
+
+    def __init__(self):
+        self.data = {}
+
+    def __iter__(self):
+        return self.data.__iter__()
+
+    def get(self, key, default: Any = None) -> Any:
+        # Emulate Django QueryDict behaviour, returning only the first element of a list
+        if isinstance(self.data.get(key), list):
+            return self.data[key][0]
+
+        return self.data.get(key, default)
+
+    def getlist(self, key: str, default: Any = None) -> list[Any]:
+        """A mock function for the QueryDict method of the same name."""
+        return self.data.get(key, default)

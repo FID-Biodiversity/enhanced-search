@@ -1,7 +1,7 @@
 """Functions interacting closely with HTML input and sanitize it."""
 
 from copy import copy
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 
 from enhanced_search.errors import UserInputException
 from enhanced_search.utils import escape_characters
@@ -12,7 +12,7 @@ NON_ALPHANUMERIC_CHARACTERS = {
 
 
 def get_from_data(
-    data: dict,
+    data: Union[dict],
     name: str,
     parameter_type: Optional[Callable] = None,
     optional: bool = False,
@@ -20,11 +20,18 @@ def get_from_data(
     escape_function: Optional[Callable] = None,
 ) -> Any:
     """Accesses the parameter with `name` in the `data` and returns its value.
+
     If the given `name` is NOT present in `data` and `optional` is True, the
     `default` is returned.
+
     This method does NO sanitizing itself. Only if an `escape_function` is provided
     the data value (and only the value!) is passed to this function for sanitizing
     purposes.
+
+    Notes:
+        You can also provide a Django QueryDict to the function. This allows
+        to extract lists from multi-value parameters.
+
     Raises:
          UserInputException: If a required parameter is not given or if a given
                                 parameter value is not of the required type.
@@ -34,7 +41,11 @@ def get_from_data(
     if not optional and not is_name_in_data:
         raise UserInputException(f"The parameter '{name}' is missing in the request!")
 
-    parameter_value = data.get(name, default)
+    # Handle Django QueryDict list parameters
+    if parameter_type == list and hasattr(data, "getlist"):
+        parameter_value = data.getlist(name, default)
+    else:
+        parameter_value = data.get(name, default)
 
     if (
         parameter_value is not None
@@ -42,7 +53,7 @@ def get_from_data(
         and parameter_value != default  # Default value is not typed!
     ):
         try:
-            if isinstance(parameter_value, list):
+            if isinstance(parameter_value, list) and parameter_type != list:
                 parameter_value = [parameter_type(value) for value in parameter_value]
             elif parameter_type == bool:
                 parameter_value = str(parameter_value).lower() in {
