@@ -54,35 +54,36 @@ class SparqlGraphDatabase:
         parameters and returns the retrieved data as string.
         """
         if not is_safe:
-            query = self.sanitize_query(query)
+            query = escape_sparql_input(query)
 
         self._db.setQuery(query)
 
         return json.dumps(self._db.queryAndConvert())
 
-    def sanitize_query(self, text: str) -> str:
-        """Escapes dangerous characters in the given text string.
-        Escaped characters:
-            * Single quotes
-            * Double quotes
-            * Backslashes
-            * Hashtags
-        """
-        characters_to_escape = [
-            "\\",
-            "'",
-            '"',
-            "#",
-            "<",
-            ">",
-        ]  # backslash has to be the first escaped character!
-
-        for char in characters_to_escape:
-            text = text.replace(char, f"\\{char}")
-
-        return text
-
     def _create_sparql_connector(self) -> SPARQLWrapper:
         sparql = SPARQLWrapper(endpoint=self.url, returnFormat=self.return_format)
         sparql.setMethod(self.request_type)
         return sparql
+
+
+def escape_sparql_input(text: str) -> str:
+    """Escapes dangerous characters in the given text string.
+    Escaped characters:
+        * Single quotes
+        * Double quotes
+        * Backslashes
+        * Hashtags
+    """
+    characters_to_escape = [
+        "\\",
+        "'",
+        '"',
+        "#",
+        "<",
+        ">",
+    ]  # backslash has to be the first escaped character!
+
+    for char in characters_to_escape:
+        text = text.replace(char, f"\\{char}")
+
+    return text

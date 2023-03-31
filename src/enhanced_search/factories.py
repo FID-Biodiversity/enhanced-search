@@ -2,7 +2,7 @@
 
 import importlib
 from copy import deepcopy
-from typing import Any, List, Optional, Type
+from typing import Any, List, Type
 
 from enhanced_search import configuration as config
 from enhanced_search.annotation.query.engines import SemanticEngine
@@ -33,9 +33,7 @@ class TextAnnotatorFactory:
         return self.create_by_configuration(configuration)
 
     @staticmethod
-    def create_by_configuration(
-        engines: List[AnnotationEngine]
-    ) -> TextAnnotator:
+    def create_by_configuration(engines: List[AnnotationEngine]) -> TextAnnotator:
         """Creates a TextAnnotator object by the given configuration."""
         return TextAnnotator(engines)
 
@@ -58,7 +56,7 @@ class TextAnnotatorFactory:
         ]
 
     def _create_fallback_database(self) -> Database:
-        key_value_db_instance = load_class(config.FALLBACK_DATABASE_CLASS, Database)
+        key_value_db_instance = load_class(config.FALLBACK_DATABASE_CLASS)
         db = key_value_db_instance()
         db.parse_data(config.FALLBACK_DATABASE_DATA)
         return db
@@ -98,9 +96,7 @@ class SemanticEngineFactory:
         self._load_database(engine_parameters)
 
         engine_import_path = engine_parameters.pop(CLASS_PATH_KEYWORD)
-        semantic_engine_callable = load_class(
-            module_path=engine_import_path, required_type=SemanticEngine
-        )
+        semantic_engine_callable = load_class(module_path=engine_import_path)
 
         return semantic_engine_callable(**engine_parameters)
 
@@ -176,10 +172,10 @@ class DatabaseFactory:
 
     def load_database(self, module_path: str) -> Type[Database]:
         """Load a Database type class from the given module path."""
-        return load_class(module_path, Database)
+        return load_class(module_path)
 
 
-def load_class(module_path: str, required_type: Optional[type] = None) -> Type[Any]:
+def load_class(module_path: str) -> Type[Any]:
     """Load a type class from the given module path.
 
     :raises TypeError: If the required_type is not None and if the loaded class is not
@@ -188,11 +184,5 @@ def load_class(module_path: str, required_type: Optional[type] = None) -> Type[A
     module, clazz = module_path.rsplit(".", 1)
     module_type = importlib.import_module(module)
     class_callable = getattr(module_type, clazz)
-
-    if required_type is not None and not issubclass(class_callable, required_type):
-        raise TypeError(
-            f"You have to provide a class obeying the Database interface! "
-            f"The module '{module_path}' does not do so!"
-        )
 
     return class_callable
