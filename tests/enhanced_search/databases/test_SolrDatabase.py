@@ -25,6 +25,10 @@ class TestSolrDatabase:
             ("Foo bar", "Foo bar"),
             ("id:'foo bar'", "id\\:\\'foo bar\\'"),
             ('id:"foo bar"', 'id\\:\\"foo bar\\"'),
+            (
+                r"Some-string-with-hyphens and special characters: %3A & \u123",
+                r"Some\-string\-with\-hyphens and special characters\: %3A \& \\u123",
+            ),
         ],
     )
     def test_sanitization(self, query: str, expected_sanitized_query: str, solr_db):

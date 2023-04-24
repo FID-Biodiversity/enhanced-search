@@ -70,7 +70,7 @@ def escape_solr_input(query: str, ignore_quotations: bool = False) -> str:
         ignore_quotations: If True, single and double quotation marks are not
                             escaped.
     """
-    solr_escape_characters = list("&|+\\!(){}[\\]*^~?:$=")
+    solr_escape_characters = list("&|+\\!(){}[\\]*^~?:$=-")
     if not ignore_quotations:
         solr_escape_characters.extend(['"', "'"])
 
