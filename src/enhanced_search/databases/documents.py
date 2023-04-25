@@ -29,8 +29,8 @@ class SolrDatabase:
         >>> db = SolrDatabase(url="http://localhost:1234/solr/my-core")
     """
 
-    def __init__(self, url: str):
-        self._db = pysolr.Solr(url)
+    def __init__(self, url: str, *args, **kwargs):
+        self._db = pysolr.Solr(url, *args, **kwargs)
 
     def read(self, query: str, is_safe: bool = False, **kwargs) -> str:
         """Searches the data in the Solr database.
