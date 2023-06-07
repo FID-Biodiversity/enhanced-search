@@ -313,6 +313,21 @@ class TestSolrQueryGenerator:
         generated_query = solr_query_generator.to_solr_query(query)
         assert generated_query.string == expected_solr_query
 
+    def test_query_all_solr_query(
+        self,
+        solr_query_generator: SolrQueryGenerator,
+    ):
+        """Feature: The "query all" special query is passed by the
+        SolrQueryGenerator.
+        """
+        query = Query(
+            original_string="*:*",
+            literals=[LiteralString(begin=0, end=3, text="*", is_safe=True)],
+        )
+        solr_query_generator.default_search_field = "*"
+        generated_query = solr_query_generator.to_solr_query(query)
+        assert generated_query.string == "*:*"
+
     @pytest.mark.parametrize(
         ["query", "expected_solr_query"],
         [
