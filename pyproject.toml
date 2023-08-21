@@ -18,7 +18,7 @@ classifiers = [
 ]
 dependencies = [
     "pysolr==3.9.0",
-    "redis~=4.0",
+    "redis~=5.0",
     "simplemma==0.9.1",
     "solrq==1.1.2",
     "SPARQL-Burger~=1.0.0",
