@@ -51,7 +51,7 @@ dev = [
     # Testing Dependencies
     "rdflib",
     "fakeredis",
-    "responses~=0.23.0"
+    "responses~=0.24.0"
 ]
 
 [tool.pytest.ini_options]
